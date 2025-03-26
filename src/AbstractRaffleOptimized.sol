@@ -4,7 +4,6 @@ pragma solidity ^0.8.24;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-
 import "forge-std/console.sol";
 
 /**
@@ -13,8 +12,7 @@ import "forge-std/console.sol";
  * @notice Abstract contract for a raffle.
  * All tickets are minted as a NFT.
  */
-abstract contract AbstractRaffleOptimized is ERC721, ReentrancyGuard
-{
+abstract contract AbstractRaffleOptimized is ERC721, ReentrancyGuard {
     address payable public immutable owner;
     uint8 public immutable maxTickets;
     uint256 public immutable prize;
@@ -23,16 +21,27 @@ abstract contract AbstractRaffleOptimized is ERC721, ReentrancyGuard
     bool internal isRaffleFinished = false;
 
     event YourParticipation(address indexed _player, uint8 _NFTnumber);
-    event RaffleWinner(string _message, uint8 _winnerTicket, uint256 _prize, address _winnerAddress);
+    event RaffleWinner(
+        string _message,
+        uint8 _winnerTicket,
+        uint256 _prize,
+        address _winnerAddress
+    );
     event RaffleReset(string _message);
-    event WithdrawBallance(string _message, uint256 _benefitWei, address _benefitAddress);
+    event WithdrawBallance(
+        string _message,
+        uint256 _benefitWei,
+        address _benefitAddress
+    );
 
     error ImpossibleToCreateNFTTicket(string message, address buyerAddress);
 
-
-    constructor(uint8 _maxTickets, uint256 _prize, uint256 _ticketPrice, string memory _raffleName) 
-        ERC721(_raffleName, "RFFLNFT")
-    {
+    constructor(
+        uint8 _maxTickets,
+        uint256 _prize,
+        uint256 _ticketPrice,
+        string memory _raffleName
+    ) ERC721(_raffleName, "RFFLNFT") {
         owner = payable(msg.sender);
         maxTickets = _maxTickets;
         prize = _prize;
@@ -42,55 +51,67 @@ abstract contract AbstractRaffleOptimized is ERC721, ReentrancyGuard
     /**
      * return uint256 the price of 1 ticket in Wei
      */
-    function getTicketPrice() public view returns (uint256)
-    {
+    function getTicketPrice() public view returns (uint256) {
         return ticketPrice;
     }
 
-    
     /**
      * Buy tickets with ether and mint nft
      * @param _nbTicketToBuyAsked number of ticket that player wants to buy
      */
-    function buyTickets(uint8 _nbTicketToBuyAsked) public virtual payable nonReentrant()
-    {
-        console.log("Asking to get %s tickets from %s with amount %s", _nbTicketToBuyAsked, msg.sender, msg.value);
-        require( ! isRaffleFinished, "Raffle is finished yet! Please come again later");
-        require( currentTickets < maxTickets, "Raffle has sell all the tickets");
-        require(msg.value >= _nbTicketToBuyAsked * ticketPrice,  "Please send the a necessary amount or more to buy tickets, check 'getTicketPrice()'");
+    function buyTickets(
+        uint8 _nbTicketToBuyAsked
+    ) public payable virtual nonReentrant {
+        console.log(
+            "Asking to get %s tickets from %s with amount %s",
+            _nbTicketToBuyAsked,
+            msg.sender,
+            msg.value
+        );
+        require(
+            !isRaffleFinished,
+            "Raffle is finished yet! Please come again later"
+        );
+        require(currentTickets < maxTickets, "Raffle has sell all the tickets");
+        require(
+            msg.value >= _nbTicketToBuyAsked * ticketPrice,
+            "Please send the a necessary amount or more to buy tickets, check 'getTicketPrice()'"
+        );
 
         uint256 excessEther;
         // Calculate the number to buy. In case of less tickets available than asked
         uint8 ticketBuyable;
-        if (maxTickets - currentTickets < _nbTicketToBuyAsked)
-        {
+        if (maxTickets - currentTickets < _nbTicketToBuyAsked) {
             ticketBuyable = maxTickets - currentTickets;
-        }
-        else
-        {
-            ticketBuyable =_nbTicketToBuyAsked;
+        } else {
+            ticketBuyable = _nbTicketToBuyAsked;
         }
 
-        for (uint8 i = 0; i < ticketBuyable; i++)
-        {
+        for (uint8 i = 0; i < ticketBuyable; i++) {
             // Todo make participation ok if less tickets created, ie don't revert all
-             if ( ! participateAndNFT(msg.sender))
-             {
-                // Revert the whole transaction, ie all ticket 
+            if (!participateAndNFT(msg.sender)) {
+                // Revert the whole transaction, ie all ticket
                 revert ImpossibleToCreateNFTTicket({
                     message: "Can't participate because minting failed",
-                    buyerAddress : msg.sender
-                    });
-             }
+                    buyerAddress: msg.sender
+                });
+            }
         }
-        
-        excessEther = msg.value - ( (ticketBuyable) * ticketPrice);
-        if (excessEther > 0)
-        {
+
+        excessEther = msg.value - ((ticketBuyable) * ticketPrice);
+        if (excessEther > 0) {
             payable(msg.sender).transfer(excessEther);
-            console.log("Sending back amount %s to %s", excessEther, msg.sender);
+            console.log(
+                "Sending back amount %s to %s",
+                excessEther,
+                msg.sender
+            );
         }
-        console.log("currentTickets :%s and maxTickets :%s", currentTickets, maxTickets);
+        console.log(
+            "currentTickets :%s and maxTickets :%s",
+            currentTickets,
+            maxTickets
+        );
     }
 
     /**
@@ -99,9 +120,8 @@ abstract contract AbstractRaffleOptimized is ERC721, ReentrancyGuard
      */
     receive() external payable {
         uint256 maxTicketBuyable = msg.value / ticketPrice;
-        
-        if (maxTicketBuyable > 255)
-        {
+
+        if (maxTicketBuyable > 255) {
             maxTicketBuyable = 255;
         }
 
@@ -111,8 +131,7 @@ abstract contract AbstractRaffleOptimized is ERC721, ReentrancyGuard
     /**
      * Return number of available tickets
      */
-    function availableTickets() public view returns (uint8)
-    {
+    function availableTickets() public view returns (uint8) {
         return maxTickets - currentTickets;
     }
 
@@ -121,30 +140,28 @@ abstract contract AbstractRaffleOptimized is ERC721, ReentrancyGuard
      * @param _sender address to associate the NFT with
      * @param tokenID the token to associate with the address (a ticket number here)
      */
-    function safeMint(address _sender, uint256 tokenID) internal virtual
-    {
+    function safeMint(address _sender, uint256 tokenID) internal virtual {
         super._safeMint(_sender, tokenID);
     }
-
 
     /**
      * Mint a NFT with _sender, the NFT is the ticket
      * @param _sender address of the ticket buyer to associate with the NFT
      */
-    function participateAndNFT(address _sender) private returns (bool)
-    {
+    function participateAndNFT(address _sender) private returns (bool) {
         safeMint(_sender, currentTickets);
 
         // Check that token has been minted correctly
-        if (_ownerOf(currentTickets)== _sender)
-        {
-            console.log("A raffle ticket %s has been minted for owner %s", currentTickets, _sender);
+        if (_ownerOf(currentTickets) == _sender) {
+            console.log(
+                "A raffle ticket %s has been minted for owner %s",
+                currentTickets,
+                _sender
+            );
             emit YourParticipation(_sender, currentTickets);
-            currentTickets ++;
+            currentTickets++;
             return true;
-        } 
-        else
-        {
+        } else {
             return false;
         }
     }
@@ -153,10 +170,15 @@ abstract contract AbstractRaffleOptimized is ERC721, ReentrancyGuard
      * Launch the raffle, please add a modifier in child contract to limit usage
      * Emit event with the winner address and its prize
      */
-    function launchRaffle() public virtual nonReentrant()
-    {
-        require(isRaffleFinished == false, "Raffle is finished yet, come back later!");
-        require(currentTickets == maxTickets, "Not all tickets have been sold!");
+    function launchRaffle() public virtual nonReentrant {
+        require(
+            isRaffleFinished == false,
+            "Raffle is finished yet, come back later!"
+        );
+        require(
+            currentTickets == maxTickets,
+            "Not all tickets have been sold!"
+        );
         // Not really random but should do the job
         // We can use block.prevrandao but with evm >=paris but still not really random
         uint8 winnerTicket = uint8(getRandom(0, maxTickets - 1));
@@ -166,7 +188,7 @@ abstract contract AbstractRaffleOptimized is ERC721, ReentrancyGuard
         emit RaffleWinner("Raffle has a winner!", winnerTicket, prize, winner);
         // Send prize to the winner address
         winner.transfer(prize);
-        isRaffleFinished=true;
+        isRaffleFinished = true;
     }
 
     /**
@@ -175,31 +197,29 @@ abstract contract AbstractRaffleOptimized is ERC721, ReentrancyGuard
      */
     function withdrawBenefit(address payable _benefit) public virtual;
 
-
     /**
      * Reset the raffle to its initial state
      */
-    function _resetContract() internal virtual
-    {   
-        require(isRaffleFinished == true, "You can only reset this contract once the raffle is finished.");
+    function _resetContract() internal virtual {
+        require(
+            isRaffleFinished == true,
+            "You can only reset this contract once the raffle is finished."
+        );
         resetNTFTickets();
         currentTickets = 0;
         isRaffleFinished = false;
         emit RaffleReset("Raffle has been reset");
     }
 
-    function resetContract() external virtual nonReentrant()
-    {
+    function resetContract() external virtual nonReentrant {
         _resetContract();
     }
 
     /**
      * Reset all nft that has been minted
      */
-    function resetNTFTickets() internal 
-    {
-        for (uint8 i = 0; i< currentTickets; i++)
-        {
+    function resetNTFTickets() internal {
+        for (uint8 i = 0; i < currentTickets; i++) {
             _burn(i);
         }
     }
@@ -209,10 +229,23 @@ abstract contract AbstractRaffleOptimized is ERC721, ReentrancyGuard
      * @param _min the minimum number to return (from 0)
      * @param _max the maximum number to return (until 255 included)
      */
-    function getRandom(uint8 _min, uint8 _max) internal virtual returns (uint8)
-    {
+    function getRandom(
+        uint8 _min,
+        uint8 _max
+    ) internal virtual returns (uint8) {
         // Not really random but should do the job
         // We can use block.prevrandao but with evm >=paris but still not really random
-        return uint8(uint256(keccak256(abi.encodePacked(block.timestamp, block.prevrandao, msg.sender)))% (_max - _min + 1)) + _min;
+        return
+            uint8(
+                uint256(
+                    keccak256(
+                        abi.encodePacked(
+                            block.timestamp,
+                            block.prevrandao,
+                            msg.sender
+                        )
+                    )
+                ) % (_max - _min + 1)
+            ) + _min;
     }
 }
