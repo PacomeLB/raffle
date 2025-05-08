@@ -7,6 +7,8 @@ import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
 import {IV4Router} from "@uniswap/v4-periphery/src/interfaces/IV4Router.sol";
 import {Actions} from "@uniswap/v4-periphery/src/libraries/Actions.sol";
 import {IPermit2} from "@uniswap/permit2/src/interfaces/IPermit2.sol";
+import {ISignatureTransfer} from "@uniswap/permit2/src/interfaces/ISignatureTransfer.sol";
+import {IHooks} from "@uniswap/v4-core/src/interfaces/IHooks.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
 import {Currency} from "@uniswap/v4-core/src/types/Currency.sol";
@@ -17,6 +19,8 @@ contract SwapERC20ToEthUniSwapV4 is PoolStateReader{
     using StateLibrary for IPoolManager;
 
     address public linkAddress = 0x779877A7B0D9E8603169DdbD7836e478b4624789;
+
+    
 
 
     UniversalRouter public immutable router;
@@ -39,7 +43,7 @@ contract SwapERC20ToEthUniSwapV4 is PoolStateReader{
         address token,
         uint160 amount,
         uint48 expiration
-    ) external {
+    ) internal {
         IERC20(token).approve(address(permit2), type(uint256).max);
         permit2.approve(token, address(router), amount, expiration);
 
@@ -50,13 +54,47 @@ contract SwapERC20ToEthUniSwapV4 is PoolStateReader{
         IERC20(token).transferFrom(msg.sender, address(router), amount);    
     }
 
+    function payWithLink(bytes calldata _signature, address _tokenOwner, uint256 _amount, uint256 _nonce, uint256 _deadline ) external {
+
+        // Call the permit2 contract to transfer the tokens in the contract
+        permit2.permitTransferFrom(ISignatureTransfer.PermitTransferFrom({
+            permitted: ISignatureTransfer.TokenPermissions({
+                token: linkAddress,
+                amount: _amount
+            }),
+            nonce: _nonce,
+            deadline: _deadline
+        }), ISignatureTransfer.SignatureTransferDetails({
+            to: address(this),
+            requestedAmount: _amount}),
+            _tokenOwner,
+            _signature);
+
+            approveTokenWithPermit2(linkAddress, uint160(_amount), uint48(_deadline));
+
+            
+            swapExactInputSingleTokenToEth(
+                PoolKey({
+                    currency0: Currency.wrap(address(0)),
+                    currency1: Currency.wrap(linkAddress),
+                    fee: 500,
+                    tickSpacing:10,
+                    hooks: IHooks(address(0))
+                }),
+                uint128(_amount),
+                uint128(0),
+                block.timestamp + 1 hours
+            );
+    
+    }
+
 
     function swapExactInputSingleTokenToEth(
-        PoolKey calldata key, // PoolKey struct that identifies the v4 pool
+        PoolKey memory key, // PoolKey struct that identifies the v4 pool
         uint128 amountIn, // Exact amount of tokens to swap
         uint128 minAmountOut, // Minimum amount of output tokens expected
         uint256 deadline // Timestamp after which the transaction will revert
-    ) external returns (uint256 amountOut) {
+    ) internal returns (uint256 amountOut) {
  
         bytes memory commands = abi.encodePacked(uint8(Commands.V4_SWAP));
 
