@@ -79,6 +79,8 @@ forge script --chain sepolia script/RaffleAdminPayTaxVrf.s.sol:RaffleAdminPayTax
 
 forge script --chain sepolia script/SwapERC20ToEthUniSwapV4.s.sol:SwapERC20ToEthUniSwapV4Script --rpc-url $SEPOLIA_RPC_URL --broadcast --verify -vvvv --interactives 1
 
+forge script --chain sepolia script/PriceUtils.s.sol:PriceUtilsScript --rpc-url $SEPOLIA_RPC_URL --broadcast --verify -vvvv --interactives 1
+
 https://sepolia.etherscan.io/tx/0xde655055445eb49b3e189cdef2b5fccc87a1b11bbb7ea4a8d5192a717e5a8141/advanced
 
 # fork sepolia to local

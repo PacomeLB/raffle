@@ -15,13 +15,10 @@ import {Currency} from "@uniswap/v4-core/src/types/Currency.sol";
 import {StateLibrary} from "@uniswap/v4-core/src/libraries/StateLibrary.sol";
 import {PoolStateReader} from "./PoolStateReader.sol";
 
-contract SwapERC20ToEthUniSwapV4 is PoolStateReader{
+contract SwapERC20ToEthUniSwapV4 is PoolStateReader {
     using StateLibrary for IPoolManager;
 
     address public linkAddress = 0x779877A7B0D9E8603169DdbD7836e478b4624789;
-
-    
-
 
     UniversalRouter public immutable router;
     // IPoolManager public immutable poolManager;
@@ -33,7 +30,7 @@ contract SwapERC20ToEthUniSwapV4 is PoolStateReader{
         address payable _router,
         address _permit2,
         address _poolManager
-    )PoolStateReader(IPoolManager(_poolManager)) {
+    ) PoolStateReader(IPoolManager(_poolManager)) {
         router = UniversalRouter(_router);
         permit2 = IPermit2(_permit2);
         admin = payable(msg.sender);
@@ -46,48 +43,56 @@ contract SwapERC20ToEthUniSwapV4 is PoolStateReader{
     ) internal {
         IERC20(token).approve(address(permit2), type(uint256).max);
         permit2.approve(token, address(router), amount, expiration);
-
     }
 
-    function transferToURouter(uint256 amount, address token) external
-    {
-        IERC20(token).transferFrom(msg.sender, address(router), amount);    
+    function transferToURouter(uint256 amount, address token) external {
+        IERC20(token).transferFrom(msg.sender, address(router), amount);
     }
 
-    function payWithLink(bytes calldata _signature, address _tokenOwner, uint256 _amount, uint256 _nonce, uint256 _deadline ) external {
-
+    function payWithLink(
+        bytes calldata _signature,
+        address _tokenOwner,
+        uint256 _amount,
+        uint256 _nonce,
+        uint256 _deadline
+    ) external {
         // Call the permit2 contract to transfer the tokens in the contract
-        permit2.permitTransferFrom(ISignatureTransfer.PermitTransferFrom({
-            permitted: ISignatureTransfer.TokenPermissions({
-                token: linkAddress,
-                amount: _amount
-            }),
-            nonce: _nonce,
-            deadline: _deadline
-        }), ISignatureTransfer.SignatureTransferDetails({
-            to: address(this),
-            requestedAmount: _amount}),
-            _tokenOwner,
-            _signature);
-
-            approveTokenWithPermit2(linkAddress, uint160(_amount), uint48(_deadline));
-
-            
-            swapExactInputSingleTokenToEth(
-                PoolKey({
-                    currency0: Currency.wrap(address(0)),
-                    currency1: Currency.wrap(linkAddress),
-                    fee: 500,
-                    tickSpacing:10,
-                    hooks: IHooks(address(0))
+        permit2.permitTransferFrom(
+            ISignatureTransfer.PermitTransferFrom({
+                permitted: ISignatureTransfer.TokenPermissions({
+                    token: linkAddress,
+                    amount: _amount
                 }),
-                uint128(_amount),
-                uint128(0),
-                block.timestamp + 1 hours
-            );
-    
-    }
+                nonce: _nonce,
+                deadline: _deadline
+            }),
+            ISignatureTransfer.SignatureTransferDetails({
+                to: address(this),
+                requestedAmount: _amount
+            }),
+            _tokenOwner,
+            _signature
+        );
 
+        approveTokenWithPermit2(
+            linkAddress,
+            uint160(_amount),
+            uint48(_deadline)
+        );
+
+        uint256 amountOut = swapExactInputSingleTokenToEth(
+            PoolKey({
+                currency0: Currency.wrap(address(0)),
+                currency1: Currency.wrap(linkAddress),
+                fee: 500,
+                tickSpacing: 10,
+                hooks: IHooks(address(0))
+            }),
+            uint128(_amount),
+            uint128(0),
+            block.timestamp + 1 hours
+        );
+    }
 
     function swapExactInputSingleTokenToEth(
         PoolKey memory key, // PoolKey struct that identifies the v4 pool
@@ -95,7 +100,6 @@ contract SwapERC20ToEthUniSwapV4 is PoolStateReader{
         uint128 minAmountOut, // Minimum amount of output tokens expected
         uint256 deadline // Timestamp after which the transaction will revert
     ) internal returns (uint256 amountOut) {
- 
         bytes memory commands = abi.encodePacked(uint8(Commands.V4_SWAP));
 
         // Encode V4Router actions
@@ -117,7 +121,6 @@ contract SwapERC20ToEthUniSwapV4 is PoolStateReader{
                 hookData: bytes("") // no hook data needed
             })
         );
-
 
         // Second parameter: specify input tokens for the swap
         // encode SETTLE_ALL parameters
@@ -143,9 +146,7 @@ contract SwapERC20ToEthUniSwapV4 is PoolStateReader{
     }
 
     // Receive eth from withdraw
-    receive() external payable {
-        
-    }
+    receive() external payable {}
 
     /**
      * Withdraw the raffle contract to the administrator
@@ -160,8 +161,7 @@ contract SwapERC20ToEthUniSwapV4 is PoolStateReader{
     /**
      * Allow withdraw of Link tokens from the contract
      */
-    function withdrawLink() external 
-    {
+    function withdrawLink() external {
         IERC20 link = IERC20(linkAddress);
         require(
             link.transfer(msg.sender, link.balanceOf(address(this))),
