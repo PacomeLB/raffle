@@ -83,13 +83,15 @@ forge script --chain sepolia script/PriceUtils.s.sol:PriceUtilsScript --rpc-url 
 
 https://sepolia.etherscan.io/tx/0xde655055445eb49b3e189cdef2b5fccc87a1b11bbb7ea4a8d5192a717e5a8141/advanced
 
-# fork sepolia to local
+# fork sepolia to local with chain id 31337
 
-anvil --fork-url https://eth-sepolia.g.alchemy.com/v2/GBm__wLDvs_zeYjXn7L5Krw2RXBHWMeO
+anvil --fork-url https://eth-sepolia.g.alchemy.com/v2/GBm__wLDvs_zeYjXn7L5Krw2RXBHWMeO --chain-id 31337
 
 # Deploy on local fork
 
-forge script --chain sepolia script/PriceUtils.s.sol:PriceUtilsScript --rpc-url http://127.0.0.1:8545 --broadcast -vvvv --slow --private-key "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+forge script script/PriceUtils.s.sol:PriceUtilsScript --rpc-url http://127.0.0.1:8545 --broadcast -vvvv --slow --private-key "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+
+forge script script/SwapERC20ToEthUniSwapV4.s.sol:SwapERC20ToEthUniSwapV4Script --rpc-url http://127.0.0.1:8545 --broadcast -vvvv --slow --private-key "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
 
 # interact with contract on the fork
 

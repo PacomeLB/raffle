@@ -15,7 +15,7 @@ import {console} from "forge-std/console.sol";
 /**
  * @title Contract for calculating prices and amounts in Uniswap V4 pools
  * @author Pakish https://github.com/Pakish
- * @notice Allows users calculate the minimum amount of an ERC20 token to swap to receive a certain amount of ETH
+ * @notice Allows users calculate the minimum amount of an ERC20 token to swap to receive a certain amount of ETH. Get the best pool based on the price and liquidity.
  * @dev Uses Uniswap V4 pool state to calculate prices and amounts
  */
 contract PriceUtils is PoolStateReader {
@@ -91,13 +91,13 @@ contract PriceUtils is PoolStateReader {
     }
 
     /**
-     * @notice Get a minimum amount of an ERC20 token to swap to receive a certain amount of ETH
+     * @notice Get PriceInfo array with pool info for a minimum amount of an ERC20 token to swap to receive a certain amount of ETH
      * @param _tokenERC20 the address of the ERC20 token
      * @param _amountEthWei the minimum amount of ETH to receive in wei
      * @return priceInfos an array of PriceInfo structs containing the minimum amount of the ERC20 token to swap
      * PriceInfo {address tokenERC20;uint8 decimals; uint256 tokenAmountDecimals; uint24 feeTier;}
      */
-    function getMinAmountInFromErc20ToEth(
+    function getSwapPriceInfoForMinAmountInFromErc20ToEth(
         address _tokenERC20,
         uint256 _amountEthWei
     ) public view returns (PriceInfo[] memory priceInfos) {
@@ -168,7 +168,6 @@ contract PriceUtils is PoolStateReader {
         PriceInfo[] memory _priceInfos,
         uint256 _amountEthWei
     ) public pure returns (PriceInfo memory selectedPriceInfo) {
-        uint256[] memory amountErc20ToGet = new uint256[](_priceInfos.length);
         uint8 bestPoolIndex = 0;
         bool[] memory isValidPool = new bool[](_priceInfos.length);
         bool isOneValidPool = false;
@@ -323,10 +322,11 @@ contract PriceUtils is PoolStateReader {
         address _tokenERC20,
         uint256 _amountEthWei
     ) public view returns (PriceInfo memory selectedPriceInfo) {
-        PriceInfo[] memory priceInfos = getMinAmountInFromErc20ToEth(
-            _tokenERC20,
-            _amountEthWei
-        );
+        PriceInfo[]
+            memory priceInfos = getSwapPriceInfoForMinAmountInFromErc20ToEth(
+                _tokenERC20,
+                _amountEthWei
+            );
 
         return selectPool(priceInfos, _amountEthWei);
     }
