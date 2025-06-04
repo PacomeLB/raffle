@@ -19,14 +19,13 @@ contract PoolStateReader {
         uint256 lpFee
     );
 
-
-
     struct PoolInfo {
         PoolKey key;
         uint160 sqrtPriceX96;
         int24 tick;
         uint24 protocolFee;
         uint24 lpFee;
+        uint128 liquidity;
     }
 
     IPoolManager public immutable poolManager;
@@ -35,12 +34,18 @@ contract PoolStateReader {
         poolManager = _poolManager;
     }
 
-    function getPoolState(PoolKey calldata key) public view returns (
-    uint160 sqrtPriceX96,
-    int24 tick,
-    uint24 protocolFee,
-    uint24 lpFee){
-    
+    function getPoolState(
+        PoolKey calldata key
+    )
+        public
+        view
+        returns (
+            uint160 sqrtPriceX96,
+            int24 tick,
+            uint24 protocolFee,
+            uint24 lpFee
+        )
+    {
         return poolManager.getSlot0(key.toId());
     }
 
@@ -48,52 +53,70 @@ contract PoolStateReader {
      * @param _tokenERC20 The address of the ERC20 token
      * @return poolInfos An array of PoolInfo structs containing the state of each pool with fees 500, 3000, and 10000
      */
-     function getPoolStateERC20ToEth(address _tokenERC20) public view returns (PoolInfo[] memory poolInfos){
-
+    function getPoolStateERC20ToEth(
+        address _tokenERC20
+    ) public view returns (PoolInfo[] memory poolInfos) {
         // Instanciate the array of PoolInfo structs with a length of 3
         poolInfos = new PoolInfo[](3);
 
         // Fee 500
         PoolKey memory key = getPoolKey(_tokenERC20, 500, 10);
 
-        (uint160 sqrtPriceX96, int24 tick, uint24 protocolFee, uint24 lpFee)  = poolManager.getSlot0(key.toId());
+        (
+            uint160 sqrtPriceX96,
+            int24 tick,
+            uint24 protocolFee,
+            uint24 lpFee
+        ) = poolManager.getSlot0(key.toId());
+
+        uint128 liquidity = poolManager.getLiquidity(key.toId());
 
         poolInfos[0] = PoolInfo({
             key: key,
             sqrtPriceX96: sqrtPriceX96,
             tick: tick,
             protocolFee: protocolFee,
-            lpFee: lpFee
+            lpFee: lpFee,
+            liquidity: liquidity
         });
 
         // Fee 3000
-        key =getPoolKey(_tokenERC20, 3000, 60);
+        key = getPoolKey(_tokenERC20, 3000, 60);
 
-        (sqrtPriceX96, tick, protocolFee, lpFee)  = poolManager.getSlot0(key.toId());
+        (sqrtPriceX96, tick, protocolFee, lpFee) = poolManager.getSlot0(
+            key.toId()
+        );
+
+        liquidity = poolManager.getLiquidity(key.toId());
 
         poolInfos[1] = PoolInfo({
             key: key,
             sqrtPriceX96: sqrtPriceX96,
             tick: tick,
             protocolFee: protocolFee,
-            lpFee: lpFee
+            lpFee: lpFee,
+            liquidity: liquidity
         });
 
         // Fee 10000
         key = getPoolKey(_tokenERC20, 10000, 200);
 
-        (sqrtPriceX96, tick, protocolFee, lpFee)  = poolManager.getSlot0(key.toId());
+        (sqrtPriceX96, tick, protocolFee, lpFee) = poolManager.getSlot0(
+            key.toId()
+        );
+
+        liquidity = poolManager.getLiquidity(key.toId());
 
         poolInfos[2] = PoolInfo({
             key: key,
             sqrtPriceX96: sqrtPriceX96,
             tick: tick,
             protocolFee: protocolFee,
-            lpFee: lpFee
+            lpFee: lpFee,
+            liquidity: liquidity
         });
 
         return poolInfos;
-        
     }
 
     /** Create a pool key for a given ERC20 token
@@ -102,18 +125,28 @@ contract PoolStateReader {
      * @param _tickSpacing The tick spacing for the pool
      * @return poolKey The PoolKey struct for the pool
      */
-    function getPoolKey(address _tokenERC20, uint24 _fee, int24 _tickSpacing) private pure returns (PoolKey memory) {
-        return PoolKey({
-            currency0: CurrencyLibrary.ADDRESS_ZERO,
-            currency1: Currency.wrap(_tokenERC20),
-            fee: _fee,
-            tickSpacing: _tickSpacing,
-            hooks: IHooks(address(0))
-        });
+    function getPoolKey(
+        address _tokenERC20,
+        uint24 _fee,
+        int24 _tickSpacing
+    ) private pure returns (PoolKey memory) {
+        return
+            PoolKey({
+                currency0: CurrencyLibrary.ADDRESS_ZERO,
+                currency1: Currency.wrap(_tokenERC20),
+                fee: _fee,
+                tickSpacing: _tickSpacing,
+                hooks: IHooks(address(0))
+            });
     }
 
     function emitPoolState(PoolKey calldata key) internal {
-        (uint160 sqrtPriceX96, int24 tick, uint24 protocolFee, uint24 lpFee) = getPoolState(key);
+        (
+            uint160 sqrtPriceX96,
+            int24 tick,
+            uint24 protocolFee,
+            uint24 lpFee
+        ) = getPoolState(key);
         emit PoolState(sqrtPriceX96, tick, protocolFee, lpFee);
     }
 }

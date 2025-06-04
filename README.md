@@ -87,6 +87,21 @@ https://sepolia.etherscan.io/tx/0xde655055445eb49b3e189cdef2b5fccc87a1b11bbb7ea4
 
 anvil --fork-url https://eth-sepolia.g.alchemy.com/v2/GBm__wLDvs_zeYjXn7L5Krw2RXBHWMeO
 
+# Deploy on local fork
+
+forge script --chain sepolia script/PriceUtils.s.sol:PriceUtilsScript --rpc-url http://127.0.0.1:8545 --broadcast -vvvv --slow --private-key "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+
+# interact with contract on the fork
+
+cast call 0xContractAddress "function_name()" \
+ --rpc-url http://127.0.0.1:8545 --abi ./abi/MonContrat.json
+
+cast call 0x434b002AEa2D9721104bCAb8eAE8576FE884Ffe4 "MAX_LIQUIDITY_CHANGE()" --rpc-url http://127.0.0.1:8545
+
+cast call 0x434b002AEa2D9721104bCAb8eAE8576FE884Ffe4 "getMinAmountInFromErc20ToEth(address,uint256)((address, uint8, uint256, uint24,(uint256,uint256))[])" 0x779877A7B0D9E8603169DdbD7836e478b4624789 143774531092198 --rpc-url http://127.0.0.1:8545
+
+cast call 0x434b002AEa2D9721104bCAb8eAE8576FE884Ffe4 "getBestPool(address,uint256)((address, uint8, uint256, uint24,(uint256,uint256)))" 0x779877A7B0D9E8603169DdbD7836e478b4624789 143774531092198 --rpc-url http://127.0.0.1:8545
+
 # Usage of cast for debuging
 
 export swap=0x4dD3f964dC618d58569f70a1C8f57905D94bc4e0 // Swap contract address
