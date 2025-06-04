@@ -303,9 +303,10 @@ contract PriceUtils is PoolStateReader {
         //     }
         // }
 
+        // If no valid pool was found, we can accept this token
         require(
             isOneValidPool,
-            "No valid pool found, we can accept this token!"
+            "No valid pool found, we cannot accept this token!"
         );
 
         return _priceInfos[bestPoolIndex];
