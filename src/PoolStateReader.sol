@@ -34,6 +34,16 @@ contract PoolStateReader {
         poolManager = _poolManager;
     }
 
+    /**
+     * Get the tickspacing linked to the fee
+     */
+    function getTickSpacingFromFee(uint16 fee) public pure returns (int24) {
+        if (fee == 500) return 10;
+        if (fee == 3000) return 60;
+        if (fee == 10000) return 200;
+        revert("Invalid fee");
+    }
+
     function getPoolState(
         PoolKey calldata key
     )
@@ -60,7 +70,11 @@ contract PoolStateReader {
         poolInfos = new PoolInfo[](3);
 
         // Fee 500
-        PoolKey memory key = getPoolKey(_tokenERC20, 500, 10);
+        PoolKey memory key = getPoolKey(
+            _tokenERC20,
+            500,
+            getTickSpacingFromFee(500)
+        );
 
         (
             uint160 sqrtPriceX96,
@@ -81,7 +95,7 @@ contract PoolStateReader {
         });
 
         // Fee 3000
-        key = getPoolKey(_tokenERC20, 3000, 60);
+        key = getPoolKey(_tokenERC20, 3000, getTickSpacingFromFee(3000));
 
         (sqrtPriceX96, tick, protocolFee, lpFee) = poolManager.getSlot0(
             key.toId()
@@ -99,7 +113,7 @@ contract PoolStateReader {
         });
 
         // Fee 10000
-        key = getPoolKey(_tokenERC20, 10000, 200);
+        key = getPoolKey(_tokenERC20, 10000, getTickSpacingFromFee(10000));
 
         (sqrtPriceX96, tick, protocolFee, lpFee) = poolManager.getSlot0(
             key.toId()
