@@ -15,16 +15,29 @@ import {Currency} from "@uniswap/v4-core/src/types/Currency.sol";
 import {StateLibrary} from "@uniswap/v4-core/src/libraries/StateLibrary.sol";
 import {PoolStateReader} from "./PoolStateReader.sol";
 
+import {console} from "forge-std/console.sol";
+
+/**
+ * @title Contract for swaping Erc20 token to Eth with uniswapV4
+ * @author Pakish https://github.com/Pakish
+ * @notice Allow user to swap Erc20 token to Eth via uniswapV4
+ * @dev Uses Uniswap V4 pool state to calculate prices and amounts
+ */
 contract SwapERC20ToEthUniSwapV4 is PoolStateReader {
     using StateLibrary for IPoolManager;
 
-    address public linkAddress = 0x779877A7B0D9E8603169DdbD7836e478b4624789;
-
     UniversalRouter public immutable router;
-    // IPoolManager public immutable poolManager;
     IPermit2 public immutable permit2;
 
     address payable public immutable admin;
+
+    error WithdrawErc20TokenError(string message, address erc20Token);
+
+    event SwapedErc20Token(
+        address erc20Token,
+        uint256 amountErc20In,
+        uint256 amountEth
+    );
 
     constructor(
         address payable _router,
@@ -36,70 +49,90 @@ contract SwapERC20ToEthUniSwapV4 is PoolStateReader {
         admin = payable(msg.sender);
     }
 
-    function approveTokenWithPermit2(
-        address token,
-        uint160 amount,
-        uint48 expiration
-    ) internal {
-        IERC20(token).approve(address(permit2), type(uint256).max);
-        permit2.approve(token, address(router), amount, expiration);
-    }
-
-    function transferToURouter(uint256 amount, address token) external {
-        IERC20(token).transferFrom(msg.sender, address(router), amount);
-    }
-
-    function payWithLink(
+    /**
+     * @notice Swaps an ERC20 token to ETH using a Permit2 signature
+     * @dev Performs a token swap using Permit2 for gasless approval
+     * @param _signature The EIP712 signature for Permit2 authorization
+     * @param _tokenOwner The address of the token owner initiating the swap
+     * @param _tokenErc20 The address of the ERC20 token to swap
+     * @param _amountErc20In The exact amount of ERC20 tokens to swap
+     * @param _minAmountEthOut The minimum amount of ETH to receive (slippage protection)
+     * @param _nonce The unique nonce value for this signature
+     * @param _deadline The expiration timestamp of the signature (UNIX timestamp)
+     * @param _fee The fee tier for the liquidity pool (in basis points, e.g., 3000 = 0.3%)
+     * @return amountEthOut The actual amount of ETH received from the swap
+     */
+    function swapErc20ToEth(
         bytes calldata _signature,
         address _tokenOwner,
-        uint256 _amount,
+        address _tokenErc20,
+        uint256 _amountErc20In,
+        uint256 _minAmountEthOut,
         uint256 _nonce,
-        uint256 _deadline
-    ) external {
+        uint256 _deadline,
+        uint24 _fee
+    ) external returns (uint256) {
         // Call the permit2 contract to transfer the tokens in the contract
+
+        console.log("In swap");
+
         permit2.permitTransferFrom(
             ISignatureTransfer.PermitTransferFrom({
                 permitted: ISignatureTransfer.TokenPermissions({
-                    token: linkAddress,
-                    amount: _amount
+                    token: _tokenErc20,
+                    amount: _amountErc20In
                 }),
                 nonce: _nonce,
                 deadline: _deadline
             }),
             ISignatureTransfer.SignatureTransferDetails({
                 to: address(this),
-                requestedAmount: _amount
+                requestedAmount: _amountErc20In
             }),
             _tokenOwner,
             _signature
         );
 
+        console.log("Transfer from");
+
         approveTokenWithPermit2(
-            linkAddress,
-            uint160(_amount),
+            _tokenErc20,
+            uint160(_amountErc20In),
             uint48(_deadline)
         );
+
+        console.log("Approved");
 
         uint256 amountOut = swapExactInputSingleTokenToEth(
             PoolKey({
                 currency0: Currency.wrap(address(0)),
-                currency1: Currency.wrap(linkAddress),
-                fee: 500,
-                tickSpacing: 10,
+                currency1: Currency.wrap(_tokenErc20),
+                fee: _fee,
+                tickSpacing: getTickSpacingFromFee(_fee),
                 hooks: IHooks(address(0))
             }),
-            uint128(_amount),
-            uint128(0),
-            block.timestamp + 1 hours
+            uint128(_amountErc20In),
+            uint128(_minAmountEthOut),
+            block.timestamp + 5 minutes // 5 minutes to execute the swap
         );
+
+        emit SwapedErc20Token(_tokenErc20, _amountErc20In, amountOut);
+
+        return amountOut;
     }
 
+    /**
+     * @dev Allow user to swap Erc20 token to Eth via uniswapV4 with an exact input
+     * @return uint256  The amount out of eth swaped
+     */
     function swapExactInputSingleTokenToEth(
-        PoolKey memory key, // PoolKey struct that identifies the v4 pool
-        uint128 amountIn, // Exact amount of tokens to swap
-        uint128 minAmountOut, // Minimum amount of output tokens expected
-        uint256 deadline // Timestamp after which the transaction will revert
-    ) internal returns (uint256 amountOut) {
+        PoolKey memory _key, // PoolKey struct that identifies the v4 pool
+        uint128 _amountIn, // Exact amount of tokens to swap
+        uint128 _minAmountOut, // Minimum amount of output tokens expected
+        uint256 _deadline // Timestamp after which the transaction will revert
+    ) internal returns (uint256) {
+        console.log("swapExactInputSingleTokenToEth");
+
         bytes memory commands = abi.encodePacked(uint8(Commands.V4_SWAP));
 
         // Encode V4Router actions
@@ -114,35 +147,53 @@ contract SwapERC20ToEthUniSwapV4 is PoolStateReader {
         // First parameter: swap configuration
         params[0] = abi.encode(
             IV4Router.ExactInputSingleParams({
-                poolKey: key,
+                poolKey: _key,
                 zeroForOne: false, // false we want to swap token1 to eth (0x0000000000000000000000000000000000000000) address(Token0) < address(Token1) ALWAYS
-                amountIn: amountIn, // amount of tokens we're swapping
-                amountOutMinimum: minAmountOut, // minimum amount we expect to receive
+                amountIn: _amountIn, // amount of tokens we're swapping
+                amountOutMinimum: _minAmountOut, // minimum amount we expect to receive
                 hookData: bytes("") // no hook data needed
             })
         );
 
         // Second parameter: specify input tokens for the swap
         // encode SETTLE_ALL parameters
-        params[1] = abi.encode(key.currency1, amountIn);
+        params[1] = abi.encode(_key.currency1, _amountIn);
 
         // Third parameter: specify output tokens from the swap
-        params[2] = abi.encode(key.currency0, minAmountOut);
+        params[2] = abi.encode(_key.currency0, _minAmountOut);
 
         bytes[] memory inputs = new bytes[](1);
 
         // Combine actions and params into inputs
         inputs[0] = abi.encode(actions, params);
 
-        // Execute the swap
-        router.execute{value: 0}(commands, inputs, deadline);
+        console.log("before swap");
 
-        amountOut = IERC20(Currency.unwrap(key.currency1)).balanceOf(
+        // Execute the swap
+        router.execute{value: 0}(commands, inputs, _deadline);
+
+        uint256 amountOut = IERC20(Currency.unwrap(_key.currency1)).balanceOf(
             address(this)
         );
-        require(amountOut >= minAmountOut, "Insufficient output amount");
+
+        console.log("after swap");
+
+        // Check we have enough out. Revert if not.
+        require(amountOut >= _minAmountOut, "Insufficient output amount");
 
         return amountOut;
+    }
+
+    /**
+     * @dev Approuve permit2 to spend an erc20 token and the Urouter to spend permit2
+     */
+    function approveTokenWithPermit2(
+        address token,
+        uint160 amount,
+        uint48 expiration
+    ) internal {
+        IERC20(token).approve(address(permit2), type(uint256).max);
+        permit2.approve(token, address(router), amount, expiration);
     }
 
     // Receive eth from withdraw
@@ -159,13 +210,12 @@ contract SwapERC20ToEthUniSwapV4 is PoolStateReader {
     }
 
     /**
-     * Allow withdraw of Link tokens from the contract
+     * Allow withdraw of an erc20 token from the contract
      */
-    function withdrawLink() external {
-        IERC20 link = IERC20(linkAddress);
-        require(
-            link.transfer(msg.sender, link.balanceOf(address(this))),
-            "Unable to transfer"
-        );
+    function withdrawErc20Token(address _token) external {
+        IERC20 erc20Token = IERC20(_token);
+        if (erc20Token.transfer(admin, erc20Token.balanceOf(address(this)))) {
+            revert WithdrawErc20TokenError("Unable to transfer token:", _token);
+        }
     }
 }
