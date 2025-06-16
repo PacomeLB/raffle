@@ -1,0 +1,585 @@
+[
+  {
+    "type": "constructor",
+    "inputs": [
+      {
+        "name": "_poolManager",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "MAX_LIQUIDITY_CHANGE",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint16",
+        "internalType": "uint16"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "calculateAmountIn",
+    "inputs": [
+      {
+        "name": "_amountEthWei",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "_price",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "_fees",
+        "type": "uint24",
+        "internalType": "uint24"
+      },
+      {
+        "name": "_decimals",
+        "type": "uint8",
+        "internalType": "uint8"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "minAmountIn",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "getBestPool",
+    "inputs": [
+      {
+        "name": "_tokenERC20",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "_amountEthWei",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "selectedPriceInfo",
+        "type": "tuple",
+        "internalType": "struct PriceUtils.PriceInfo",
+        "components": [
+          {
+            "name": "tokenERC20",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "decimals",
+            "type": "uint8",
+            "internalType": "uint8"
+          },
+          {
+            "name": "tokenAmountDecimals",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "feeTier",
+            "type": "uint24",
+            "internalType": "uint24"
+          },
+          {
+            "name": "liquidity",
+            "type": "tuple",
+            "internalType": "struct PriceUtils.LiquidityInfo",
+            "components": [
+              {
+                "name": "ethLiquidity",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "erc20Liquidity",
+                "type": "uint256",
+                "internalType": "uint256"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getPoolState",
+    "inputs": [
+      {
+        "name": "key",
+        "type": "tuple",
+        "internalType": "struct PoolKey",
+        "components": [
+          {
+            "name": "currency0",
+            "type": "address",
+            "internalType": "Currency"
+          },
+          {
+            "name": "currency1",
+            "type": "address",
+            "internalType": "Currency"
+          },
+          {
+            "name": "fee",
+            "type": "uint24",
+            "internalType": "uint24"
+          },
+          {
+            "name": "tickSpacing",
+            "type": "int24",
+            "internalType": "int24"
+          },
+          {
+            "name": "hooks",
+            "type": "address",
+            "internalType": "contract IHooks"
+          }
+        ]
+      }
+    ],
+    "outputs": [
+      {
+        "name": "sqrtPriceX96",
+        "type": "uint160",
+        "internalType": "uint160"
+      },
+      {
+        "name": "tick",
+        "type": "int24",
+        "internalType": "int24"
+      },
+      {
+        "name": "protocolFee",
+        "type": "uint24",
+        "internalType": "uint24"
+      },
+      {
+        "name": "lpFee",
+        "type": "uint24",
+        "internalType": "uint24"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getPoolStateERC20ToEth",
+    "inputs": [
+      {
+        "name": "_tokenERC20",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "poolInfos",
+        "type": "tuple[]",
+        "internalType": "struct PoolStateReader.PoolInfo[]",
+        "components": [
+          {
+            "name": "key",
+            "type": "tuple",
+            "internalType": "struct PoolKey",
+            "components": [
+              {
+                "name": "currency0",
+                "type": "address",
+                "internalType": "Currency"
+              },
+              {
+                "name": "currency1",
+                "type": "address",
+                "internalType": "Currency"
+              },
+              {
+                "name": "fee",
+                "type": "uint24",
+                "internalType": "uint24"
+              },
+              {
+                "name": "tickSpacing",
+                "type": "int24",
+                "internalType": "int24"
+              },
+              {
+                "name": "hooks",
+                "type": "address",
+                "internalType": "contract IHooks"
+              }
+            ]
+          },
+          {
+            "name": "sqrtPriceX96",
+            "type": "uint160",
+            "internalType": "uint160"
+          },
+          {
+            "name": "tick",
+            "type": "int24",
+            "internalType": "int24"
+          },
+          {
+            "name": "protocolFee",
+            "type": "uint24",
+            "internalType": "uint24"
+          },
+          {
+            "name": "lpFee",
+            "type": "uint24",
+            "internalType": "uint24"
+          },
+          {
+            "name": "liquidity",
+            "type": "uint128",
+            "internalType": "uint128"
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getPriceFromSqrtPriceX96",
+    "inputs": [
+      {
+        "name": "_sqrtPriceX96",
+        "type": "uint160",
+        "internalType": "uint160"
+      },
+      {
+        "name": "_decimals",
+        "type": "uint8",
+        "internalType": "uint8"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "getSwapPriceInfoForMinAmountInFromErc20ToEth",
+    "inputs": [
+      {
+        "name": "_tokenERC20",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "_amountEthWei",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "priceInfos",
+        "type": "tuple[]",
+        "internalType": "struct PriceUtils.PriceInfo[]",
+        "components": [
+          {
+            "name": "tokenERC20",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "decimals",
+            "type": "uint8",
+            "internalType": "uint8"
+          },
+          {
+            "name": "tokenAmountDecimals",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "feeTier",
+            "type": "uint24",
+            "internalType": "uint24"
+          },
+          {
+            "name": "liquidity",
+            "type": "tuple",
+            "internalType": "struct PriceUtils.LiquidityInfo",
+            "components": [
+              {
+                "name": "ethLiquidity",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "erc20Liquidity",
+                "type": "uint256",
+                "internalType": "uint256"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getTokenLiquidity",
+    "inputs": [
+      {
+        "name": "_poolInfo",
+        "type": "tuple",
+        "internalType": "struct PoolStateReader.PoolInfo",
+        "components": [
+          {
+            "name": "key",
+            "type": "tuple",
+            "internalType": "struct PoolKey",
+            "components": [
+              {
+                "name": "currency0",
+                "type": "address",
+                "internalType": "Currency"
+              },
+              {
+                "name": "currency1",
+                "type": "address",
+                "internalType": "Currency"
+              },
+              {
+                "name": "fee",
+                "type": "uint24",
+                "internalType": "uint24"
+              },
+              {
+                "name": "tickSpacing",
+                "type": "int24",
+                "internalType": "int24"
+              },
+              {
+                "name": "hooks",
+                "type": "address",
+                "internalType": "contract IHooks"
+              }
+            ]
+          },
+          {
+            "name": "sqrtPriceX96",
+            "type": "uint160",
+            "internalType": "uint160"
+          },
+          {
+            "name": "tick",
+            "type": "int24",
+            "internalType": "int24"
+          },
+          {
+            "name": "protocolFee",
+            "type": "uint24",
+            "internalType": "uint24"
+          },
+          {
+            "name": "lpFee",
+            "type": "uint24",
+            "internalType": "uint24"
+          },
+          {
+            "name": "liquidity",
+            "type": "uint128",
+            "internalType": "uint128"
+          }
+        ]
+      }
+    ],
+    "outputs": [
+      {
+        "name": "liquidityInfo",
+        "type": "tuple",
+        "internalType": "struct PriceUtils.LiquidityInfo",
+        "components": [
+          {
+            "name": "ethLiquidity",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "erc20Liquidity",
+            "type": "uint256",
+            "internalType": "uint256"
+          }
+        ]
+      }
+    ],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "poolManager",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "contract IPoolManager"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "selectPool",
+    "inputs": [
+      {
+        "name": "_priceInfos",
+        "type": "tuple[]",
+        "internalType": "struct PriceUtils.PriceInfo[]",
+        "components": [
+          {
+            "name": "tokenERC20",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "decimals",
+            "type": "uint8",
+            "internalType": "uint8"
+          },
+          {
+            "name": "tokenAmountDecimals",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "feeTier",
+            "type": "uint24",
+            "internalType": "uint24"
+          },
+          {
+            "name": "liquidity",
+            "type": "tuple",
+            "internalType": "struct PriceUtils.LiquidityInfo",
+            "components": [
+              {
+                "name": "ethLiquidity",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "erc20Liquidity",
+                "type": "uint256",
+                "internalType": "uint256"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "_amountEthWei",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "selectedPriceInfo",
+        "type": "tuple",
+        "internalType": "struct PriceUtils.PriceInfo",
+        "components": [
+          {
+            "name": "tokenERC20",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "decimals",
+            "type": "uint8",
+            "internalType": "uint8"
+          },
+          {
+            "name": "tokenAmountDecimals",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "feeTier",
+            "type": "uint24",
+            "internalType": "uint24"
+          },
+          {
+            "name": "liquidity",
+            "type": "tuple",
+            "internalType": "struct PriceUtils.LiquidityInfo",
+            "components": [
+              {
+                "name": "ethLiquidity",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "erc20Liquidity",
+                "type": "uint256",
+                "internalType": "uint256"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "event",
+    "name": "PoolState",
+    "inputs": [
+      {
+        "name": "sqrtPriceX96",
+        "type": "uint160",
+        "indexed": false,
+        "internalType": "uint160"
+      },
+      {
+        "name": "tick",
+        "type": "int24",
+        "indexed": false,
+        "internalType": "int24"
+      },
+      {
+        "name": "protocolFee",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "lpFee",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  }
+]
