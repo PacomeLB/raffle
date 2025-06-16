@@ -174,14 +174,12 @@ contract PriceUtils is PoolStateReader {
 
         // Calculate % of liquidity change for each pool
         for (uint8 i = 0; i < _priceInfos.length; i++) {
+            console.log("############ Pool %s ############", i);
             if (
                 _priceInfos[i].liquidity.erc20Liquidity == 0 ||
                 _priceInfos[i].liquidity.ethLiquidity == 0
             ) {
-                console.log(
-                    "Liquidity pool %i has zero liquidity, skipping",
-                    i
-                );
+                console.log("Liquidity pool has zero liquidity, skipping", i);
                 isValidPool[i] = false; // Mark pool as invalid
                 continue; // Skip pools with zero liquidity
             }
@@ -193,13 +191,15 @@ contract PriceUtils is PoolStateReader {
             );
 
             console.log(
-                "Liquidity pool ERC20 of %i : %s",
-                i,
+                "Liquidity pool ERC20: %s",
                 _priceInfos[i].liquidity.erc20Liquidity
             );
             console.log(
-                "Liquidity use ERC20 of %i Amount Change: %s",
-                i,
+                "Amount of ERC20 to swap: %s",
+                _priceInfos[i].tokenAmountDecimals
+            );
+            console.log(
+                "Liquidity use ERC20 amount Change : %s (1000%)",
                 liquidityErc20AmountChange
             );
 
@@ -209,13 +209,12 @@ contract PriceUtils is PoolStateReader {
                 _priceInfos[i].liquidity.ethLiquidity
             );
             console.log(
-                "Liquidity pool ETH of %i Amount Change: %s",
-                i,
+                "Liquidity pool ETH amount Change: %s",
                 _priceInfos[i].liquidity.ethLiquidity
             );
+            console.log("Amount of Eth to swap: %s", _amountEthWei);
             console.log(
-                "Liquidity use ETH of %i Amount Change: %s",
-                i,
+                "Liquidity use ETH amount Change: %s (1000%)",
                 liquidityEthAmountChange
             );
 
@@ -232,6 +231,8 @@ contract PriceUtils is PoolStateReader {
                 isOneValidPool = true; // Set flag to true if at least one valid pool is found
                 console.log("We have a valid pool: %s", i);
             }
+
+            console.log("########################");
         }
 
         // Find the best pool based on the price with a valid liquidity

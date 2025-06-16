@@ -37,7 +37,7 @@ contract PoolStateReader {
     /**
      * Get the tickspacing linked to the fee
      */
-    function getTickSpacingFromFee(uint16 fee) public pure returns (int24) {
+    function getTickSpacingFromFee(uint24 fee) internal pure returns (int24) {
         if (fee == 500) return 10;
         if (fee == 3000) return 60;
         if (fee == 10000) return 200;
