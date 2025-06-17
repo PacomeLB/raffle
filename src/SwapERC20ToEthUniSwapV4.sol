@@ -51,7 +51,6 @@ contract SwapERC20ToEthUniSwapV4 is PoolStateReader, ReentrancyGuard, Ownable {
     }
 
     /**
-     * @notice Swaps an ERC20 token to ETH using a Permit2 signature
      * @dev Performs a token swap using Permit2 for gasless approval
      * @param _signature The EIP712 signature for Permit2 authorization
      * @param _tokenOwner The address of the token owner initiating the swap
@@ -63,7 +62,7 @@ contract SwapERC20ToEthUniSwapV4 is PoolStateReader, ReentrancyGuard, Ownable {
      * @param _fee The fee tier for the liquidity pool (in basis points, e.g., 3000 = 0.3%)
      * @return amountEthOut The actual amount of ETH received from the swap
      */
-    function swapErc20ToEth(
+    function _swapErc20ToEth(
         bytes calldata _signature,
         address _tokenOwner,
         address _tokenErc20,
@@ -72,7 +71,7 @@ contract SwapERC20ToEthUniSwapV4 is PoolStateReader, ReentrancyGuard, Ownable {
         uint256 _nonce,
         uint256 _deadline,
         uint24 _fee
-    ) public returns (uint256) {
+    ) internal returns (uint256) {
         // Call the permit2 contract to transfer the tokens in the contract
 
         console.log("In swap");
@@ -123,6 +122,42 @@ contract SwapERC20ToEthUniSwapV4 is PoolStateReader, ReentrancyGuard, Ownable {
     }
 
     /**
+     * @notice Swaps an ERC20 token to ETH using a Permit2 signature. External visibility
+     * @dev Performs a token swap using Permit2 for gasless approval
+     * @param _signature The EIP712 signature for Permit2 authorization
+     * @param _tokenOwner The address of the token owner initiating the swap
+     * @param _tokenErc20 The address of the ERC20 token to swap
+     * @param _amountErc20In The exact amount of ERC20 tokens to swap
+     * @param _minAmountEthOut The minimum amount of ETH to receive (slippage protection)
+     * @param _nonce The unique nonce value for this signature
+     * @param _deadline The expiration timestamp of the signature (UNIX timestamp)
+     * @param _fee The fee tier for the liquidity pool (in basis points, e.g., 3000 = 0.3%)
+     * @return amountEthOut The actual amount of ETH received from the swap
+     */
+    function swapErc20ToEth(
+        bytes calldata _signature,
+        address _tokenOwner,
+        address _tokenErc20,
+        uint256 _amountErc20In,
+        uint256 _minAmountEthOut,
+        uint256 _nonce,
+        uint256 _deadline,
+        uint24 _fee
+    ) external returns (uint256) {
+        return
+            _swapErc20ToEth(
+                _signature,
+                _tokenOwner,
+                _tokenErc20,
+                _amountErc20In,
+                _minAmountEthOut,
+                _nonce,
+                _deadline,
+                _fee
+            );
+    }
+
+    /**
      * @notice Swaps an ERC20 token to ETH using a Permit2 signature
      * @dev Performs a token swap using Permit2 for gasless approval
      * @param _signature The EIP712 signature for Permit2 authorization
@@ -149,7 +184,7 @@ contract SwapERC20ToEthUniSwapV4 is PoolStateReader, ReentrancyGuard, Ownable {
         address payable _transferTo
     ) external nonReentrant returns (uint256) {
         console.log("In swap");
-        uint256 swappedAmountEth = swapErc20ToEth(
+        uint256 swappedAmountEth = _swapErc20ToEth(
             _signature,
             _tokenOwner,
             _tokenErc20,
