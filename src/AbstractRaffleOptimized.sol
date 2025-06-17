@@ -119,7 +119,7 @@ abstract contract AbstractRaffleOptimized is ERC721, ReentrancyGuard, Ownable {
      * Direct call to contract
      * Try to buy as much as ticket as possible
      */
-    receive() external payable {
+    receive() external payable virtual {
         uint256 maxTicketBuyable = msg.value / ticketPrice;
 
         if (maxTicketBuyable > 255) {
@@ -149,7 +149,7 @@ abstract contract AbstractRaffleOptimized is ERC721, ReentrancyGuard, Ownable {
      * Mint a NFT with _sender, the NFT is the ticket
      * @param _sender address of the ticket buyer to associate with the NFT
      */
-    function participateAndNFT(address _sender) private returns (bool) {
+    function participateAndNFT(address _sender) internal returns (bool) {
         safeMint(_sender, currentTickets);
 
         // Check that token has been minted correctly
