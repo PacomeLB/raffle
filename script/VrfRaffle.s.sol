@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {Script, console} from "forge-std/Script.sol";
-import {VrfRaffle} from "../src/VrfRaffle.sol";
+import {VrfRaffle} from "../src/utils/VrfRaffle.sol";
 
 contract VrfRaffleScript is Script {
     VrfRaffle public vrfRAffle;

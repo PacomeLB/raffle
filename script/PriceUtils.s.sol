@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {Script, console} from "forge-std/Script.sol";
-import {PriceUtils} from "../src/PriceUtils.sol";
+import {PriceUtils} from "../src/utils/PriceUtils.sol";
 
 contract PriceUtilsScript is Script {
     PriceUtils public mypriceUtils;

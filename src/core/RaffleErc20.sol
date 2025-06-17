@@ -1,7 +1,7 @@
 pragma solidity 0.8.24;
 
 import "./RaffleAdminPayTaxVrf.sol";
-import {IswapContract} from "./IswapContract.sol";
+import {IswapContract} from "../interfaces/IswapContract.sol";
 
 /**
  * @title RaffleErc20
