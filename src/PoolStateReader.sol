@@ -36,6 +36,7 @@ contract PoolStateReader {
 
     /**
      * Get the tickspacing linked to the fee
+     * @return int24 the tickspacing
      */
     function getTickSpacingFromFee(uint24 fee) internal pure returns (int24) {
         if (fee == 500) return 10;
@@ -44,6 +45,13 @@ contract PoolStateReader {
         revert("Invalid fee");
     }
 
+    /**
+     * Get slot0 of the pool
+     * @return sqrtPriceX96 current price token0 / token1
+     * @return tick current tick of the pool
+     * @return protocolFee
+     * @return lpFee fee of the pool
+     */
     function getPoolState(
         PoolKey calldata key
     )

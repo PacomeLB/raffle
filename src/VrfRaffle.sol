@@ -13,7 +13,7 @@ import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/V
  */
 
 /**
- * VrfRaffle contract that generate random number with oracl ChainLink VRF
+ * VrfRaffle contract that generate random number with oracle ChainLink VRF
  * Only authorized address can use it
  */
 
@@ -27,7 +27,6 @@ contract VrfRaffle is VRFV2PlusWrapperConsumerBase, ConfirmedOwner {
 
     event AddingAuthorizedAddress(string message, address _authorized);
 
-
     struct RequestStatus {
         uint256 paid; // amount paid in link
         bool fulfilled; // whether the request has been successfully fulfilled
@@ -40,11 +39,10 @@ contract VrfRaffle is VRFV2PlusWrapperConsumerBase, ConfirmedOwner {
     uint256[] public requestIds;
     uint256 public lastRequestId;
 
-
     mapping(uint256 => address)
         public s_consumers; /* requestId --> address consumers */
 
-    mapping(address => bool) 
+    mapping(address => bool)
         public authorizedConsumers; /* authorized consumers contract address to use this VRF */
 
     // Depends on the number of requested values that you want sent to the
@@ -123,11 +121,12 @@ contract VrfRaffle is VRFV2PlusWrapperConsumerBase, ConfirmedOwner {
         );
 
         // Owner is a wallet address -> can't call interface method
-        if (s_consumers[_requestId] != owner())
-        {
-            IrandomNumberConsumer(s_consumers[_requestId]).setRandomNumber(_requestId, _randomWords);
+        if (s_consumers[_requestId] != owner()) {
+            IrandomNumberConsumer(s_consumers[_requestId]).setRandomNumber(
+                _requestId,
+                _randomWords
+            );
         }
-
     }
 
     function getRequestStatus(
@@ -171,8 +170,7 @@ contract VrfRaffle is VRFV2PlusWrapperConsumerBase, ConfirmedOwner {
      * Set the callback gas limit
      * @param _gasLimit to set
      */
-    function setcallbackGasLimit(uint32 _gasLimit) external onlyOwner 
-    {
+    function setcallbackGasLimit(uint32 _gasLimit) external onlyOwner {
         callbackGasLimit = _gasLimit;
     }
 
@@ -180,23 +178,29 @@ contract VrfRaffle is VRFV2PlusWrapperConsumerBase, ConfirmedOwner {
      * Add authorized address
      * @param _authorizedAddress contract address authorized to call the random number generator
      */
-    function setAuthorizedAddress(address _authorizedAddress) public onlyOwner 
-    {
+    function setAuthorizedAddress(address _authorizedAddress) public onlyOwner {
         authorizedConsumers[_authorizedAddress] = true;
-        emit AddingAuthorizedAddress("New authorized address", _authorizedAddress);
+        emit AddingAuthorizedAddress(
+            "New authorized address",
+            _authorizedAddress
+        );
     }
 
     /**
      * Check that the address caller is in the authorized address list
      */
-    modifier onlyAuthorized()
-    {
-        require(authorizedConsumers[msg.sender], "Only authorized consumers can ask for a random number.");
+    modifier onlyAuthorized() {
+        require(
+            authorizedConsumers[msg.sender],
+            "Only authorized consumers can ask for a random number."
+        );
         _;
     }
 }
 
-interface IrandomNumberConsumer
-{
-    function setRandomNumber(uint256 _requestId, uint256[] calldata _randomNumber) external;
+interface IrandomNumberConsumer {
+    function setRandomNumber(
+        uint256 _requestId,
+        uint256[] calldata _randomNumber
+    ) external;
 }
