@@ -1,18 +1,17 @@
-// SPDX-License-Identifier: Unlicense
 pragma solidity 0.8.24;
 
 import "./AbstractRaffleOptimized.sol";
+import {IraffleVRF} from "./IraffleVRF.sol";
 import {ERC721URIStorage} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 
 /**
  * @title RaffleAdminTax
  * @author LEBEAU Pacôme
- * @notice Raffle contract managed by admin adress, defined when deploying the contract
+ * @notice Raffle contract managed by owner adress, defined when deploying the contract
  * the benefit of the raffle is also defined when deploying the contract, be sure where to send the benefit
  * Send the taxRate(%) of the benefit to address tax
  */
 contract RaffleAdminPayTaxVrf is AbstractRaffleOptimized, ERC721URIStorage {
-    address payable public immutable admin;
     address payable public immutable benefit;
     address payable public immutable tax;
 
@@ -31,7 +30,7 @@ contract RaffleAdminPayTaxVrf is AbstractRaffleOptimized, ERC721URIStorage {
 
     event RaffleAdminTaxDeployed(
         string message,
-        address _admin,
+        address _owner,
         address _benfit,
         address _tax,
         uint8 _taxRate,
@@ -49,7 +48,7 @@ contract RaffleAdminPayTaxVrf is AbstractRaffleOptimized, ERC721URIStorage {
      * @param _maxTickets number of tickets of the raffle (max 255)
      * @param _prize prize to win in Wei
      * @param _ticketPrice price of one ticket in Wei
-     * @param _admin admin address of the raffle
+     * @param _owner owner address of the raffle
      * @param _benefit benefit address of the raffle, after paying tax and winner, benefit will get the benefit of the raffle
      * @param _taxRate tax rate of the benefit to pay in %
      * @param _tax address to send the tax to
@@ -61,14 +60,22 @@ contract RaffleAdminPayTaxVrf is AbstractRaffleOptimized, ERC721URIStorage {
         uint8 _maxTickets,
         uint256 _prize,
         uint256 _ticketPrice,
-        address _admin,
+        address _owner,
         address _benefit,
         uint8 _taxRate,
         address _tax,
         string memory _name,
         string[] memory _tokenURIHashs,
         address _vrf
-    ) AbstractRaffleOptimized(_maxTickets, _prize, _ticketPrice, _name) {
+    )
+        AbstractRaffleOptimized(
+            _maxTickets,
+            _prize,
+            _ticketPrice,
+            _name,
+            _owner
+        )
+    {
         require(
             _maxTickets * _ticketPrice > _prize,
             "Prize must superior to the sum of all tickets"
@@ -83,7 +90,6 @@ contract RaffleAdminPayTaxVrf is AbstractRaffleOptimized, ERC721URIStorage {
                 maxTickets: _maxTickets
             });
         }
-        admin = payable(_admin);
         benefit = payable(_benefit);
         tax = payable(_tax);
         taxRate = _taxRate;
@@ -95,8 +101,8 @@ contract RaffleAdminPayTaxVrf is AbstractRaffleOptimized, ERC721URIStorage {
             super._setTokenURI(i, string.concat("ipfs://", _tokenURIHashs[i]));
         }
         emit RaffleAdminTaxDeployed(
-            "Raffle admin has been deployed",
-            admin,
+            "Raffle has been deployed",
+            owner(),
             benefit,
             tax,
             taxRate,
@@ -107,12 +113,7 @@ contract RaffleAdminPayTaxVrf is AbstractRaffleOptimized, ERC721URIStorage {
     /**
      * Launch the raffle to get a winner
      */
-    function launchRaffle()
-        public
-        override
-        onlyAdmin("Only admin can launch raffle")
-        nonReentrant
-    {
+    function launchRaffle() public override onlyOwner nonReentrant {
         require(
             isRaffleFinished == false,
             "Raffle is finished yet, come back later!"
@@ -139,12 +140,7 @@ contract RaffleAdminPayTaxVrf is AbstractRaffleOptimized, ERC721URIStorage {
      */
     function withdrawBenefit(
         address payable /*_unused*/
-    )
-        public
-        override
-        onlyAdmin("Only admin can withdraw benefits")
-        nonReentrant
-    {
+    ) public override onlyOwner nonReentrant {
         require(
             isRaffleFinished == true,
             "Raffle is not yet finished, contract balance will be available once a winner has been drawn"
@@ -169,11 +165,6 @@ contract RaffleAdminPayTaxVrf is AbstractRaffleOptimized, ERC721URIStorage {
         _resetContract();
     }
 
-    modifier onlyAdmin(string memory _refusedMessage) {
-        require(msg.sender == admin, _refusedMessage);
-        _;
-    }
-
     /**
      * Reset the raffle to its initial state
      */
@@ -192,12 +183,7 @@ contract RaffleAdminPayTaxVrf is AbstractRaffleOptimized, ERC721URIStorage {
      * For dev only
      * Reset the contract to its initial state
      */
-    function resetContract()
-        external
-        override
-        onlyAdmin("Only admin can reset the contract")
-        nonReentrant
-    {
+    function resetContract() external override onlyOwner nonReentrant {
         withdrawContract();
         isRaffleFinished = false;
         resetNTFTickets();
@@ -207,12 +193,12 @@ contract RaffleAdminPayTaxVrf is AbstractRaffleOptimized, ERC721URIStorage {
     }
 
     /**
-     * Withdraw the raffle contract to the administrator
+     * Withdraw the raffle contract to the owner
      * Security function for testing purposes
      */
     function withdrawContract() internal {
         uint256 benefitToSend = address(this).balance;
-        (bool success, ) = admin.call{value: benefitToSend}("");
+        (bool success, ) = payable(owner()).call{value: benefitToSend}("");
         require(success, "Contract withdraw failed");
     }
 
@@ -292,20 +278,4 @@ contract RaffleAdminPayTaxVrf is AbstractRaffleOptimized, ERC721URIStorage {
         require(msg.sender == vrfContractAddress, _refusedMessage);
         _;
     }
-}
-
-/**
- * Interface to the random number generator
- */
-interface IraffleVRF {
-    function requestRandomWords(
-        bool enableNativePayment
-    ) external returns (uint256);
-
-    function getRequestStatus(
-        uint256 _requestId
-    )
-        external
-        view
-        returns (uint256 paid, bool fulfilled, uint256[] memory randomWords);
 }

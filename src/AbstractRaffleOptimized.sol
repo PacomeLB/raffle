@@ -4,6 +4,8 @@ pragma solidity ^0.8.24;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+
 import "forge-std/console.sol";
 
 /**
@@ -12,8 +14,7 @@ import "forge-std/console.sol";
  * @notice Abstract contract for a raffle.
  * All tickets are minted as a NFT.
  */
-abstract contract AbstractRaffleOptimized is ERC721, ReentrancyGuard {
-    address payable public immutable owner;
+abstract contract AbstractRaffleOptimized is ERC721, ReentrancyGuard, Ownable {
     uint8 public immutable maxTickets;
     uint256 public immutable prize;
     uint8 public currentTickets = 0;
@@ -40,9 +41,9 @@ abstract contract AbstractRaffleOptimized is ERC721, ReentrancyGuard {
         uint8 _maxTickets,
         uint256 _prize,
         uint256 _ticketPrice,
-        string memory _raffleName
-    ) ERC721(_raffleName, "RFFLNFT") {
-        owner = payable(msg.sender);
+        string memory _raffleName,
+        address _owner
+    ) ERC721(_raffleName, "RFFLNFT") Ownable(_owner) {
         maxTickets = _maxTickets;
         prize = _prize;
         ticketPrice = _ticketPrice;

@@ -15,6 +15,9 @@ import {Currency} from "@uniswap/v4-core/src/types/Currency.sol";
 import {StateLibrary} from "@uniswap/v4-core/src/libraries/StateLibrary.sol";
 import {PoolStateReader} from "./PoolStateReader.sol";
 
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+
 import {console} from "forge-std/console.sol";
 
 /**
@@ -23,15 +26,14 @@ import {console} from "forge-std/console.sol";
  * @notice Allow user to swap Erc20 token to Eth via uniswapV4
  * @dev Uses Uniswap V4 pool state to calculate prices and amounts
  */
-contract SwapERC20ToEthUniSwapV4 is PoolStateReader {
+contract SwapERC20ToEthUniSwapV4 is PoolStateReader, ReentrancyGuard, Ownable {
     using StateLibrary for IPoolManager;
 
     UniversalRouter public immutable router;
     IPermit2 public immutable permit2;
 
-    address payable public immutable admin;
-
     error WithdrawErc20TokenError(string message, address erc20Token);
+    error SendSwappedEthError(string message, uint256 ethAmount, address to);
 
     event SwapedErc20Token(
         address erc20Token,
@@ -43,10 +45,9 @@ contract SwapERC20ToEthUniSwapV4 is PoolStateReader {
         address payable _router,
         address _permit2,
         address _poolManager
-    ) PoolStateReader(IPoolManager(_poolManager)) {
+    ) PoolStateReader(IPoolManager(_poolManager)) Ownable(msg.sender) {
         router = UniversalRouter(_router);
         permit2 = IPermit2(_permit2);
-        admin = payable(msg.sender);
     }
 
     /**
@@ -71,7 +72,7 @@ contract SwapERC20ToEthUniSwapV4 is PoolStateReader {
         uint256 _nonce,
         uint256 _deadline,
         uint24 _fee
-    ) external returns (uint256) {
+    ) public returns (uint256) {
         // Call the permit2 contract to transfer the tokens in the contract
 
         console.log("In swap");
@@ -119,6 +120,54 @@ contract SwapERC20ToEthUniSwapV4 is PoolStateReader {
         emit SwapedErc20Token(_tokenErc20, _amountErc20In, amountOut);
 
         return amountOut;
+    }
+
+    /**
+     * @notice Swaps an ERC20 token to ETH using a Permit2 signature
+     * @dev Performs a token swap using Permit2 for gasless approval
+     * @param _signature The EIP712 signature for Permit2 authorization
+     * @param _tokenOwner The address of the token owner initiating the swap
+     * @param _tokenErc20 The address of the ERC20 token to swap
+     * @param _amountErc20In The exact amount of ERC20 tokens to swap
+     * @param _minAmountEthOut The minimum amount of ETH to receive (slippage protection)
+     * @param _nonce The unique nonce value for this signature
+     * @param _deadline The expiration timestamp of the signature (UNIX timestamp)
+     * @param _fee The fee tier for the liquidity pool (in basis points, e.g., 3000 = 0.3%)
+     * @param _transferTo address to transfer the swapped eth
+     * @return amountEthOut The actual amount of ETH received from the swap
+     */
+    function swapErc20ToEthAndTransfer(
+        // test msg.sender is still good
+        bytes calldata _signature,
+        address _tokenOwner,
+        address _tokenErc20,
+        uint256 _amountErc20In,
+        uint256 _minAmountEthOut,
+        uint256 _nonce,
+        uint256 _deadline,
+        uint24 _fee,
+        address payable _transferTo
+    ) external nonReentrant returns (uint256) {
+        console.log("In swap");
+        uint256 swappedAmountEth = swapErc20ToEth(
+            _signature,
+            _tokenOwner,
+            _tokenErc20,
+            _amountErc20In,
+            _minAmountEthOut,
+            _nonce,
+            _deadline,
+            _fee
+        );
+
+        (bool success, ) = _transferTo.call{value: swappedAmountEth}("");
+        if (!success) {
+            revert SendSwappedEthError(
+                "Impossible to send swapped eth",
+                swappedAmountEth,
+                _transferTo
+            );
+        }
     }
 
     /**
@@ -200,12 +249,12 @@ contract SwapERC20ToEthUniSwapV4 is PoolStateReader {
     receive() external payable {}
 
     /**
-     * Withdraw the raffle contract to the administrator
+     * Withdraw the raffle contract to the owner
      * Security function for testing purposes
      */
     function withdrawContract() external {
         uint256 withdrawAmout = address(this).balance;
-        (bool success, ) = admin.call{value: withdrawAmout}("");
+        (bool success, ) = payable(owner()).call{value: withdrawAmout}("");
         require(success, "Contract withdraw failed");
     }
 
@@ -214,7 +263,7 @@ contract SwapERC20ToEthUniSwapV4 is PoolStateReader {
      */
     function withdrawErc20Token(address _token) external {
         IERC20 erc20Token = IERC20(_token);
-        if (erc20Token.transfer(admin, erc20Token.balanceOf(address(this)))) {
+        if (erc20Token.transfer(owner(), erc20Token.balanceOf(address(this)))) {
             revert WithdrawErc20TokenError("Unable to transfer token:", _token);
         }
     }
