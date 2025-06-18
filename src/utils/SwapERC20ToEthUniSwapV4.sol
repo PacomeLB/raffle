@@ -169,7 +169,7 @@ contract SwapERC20ToEthUniSwapV4 is PoolStateReader, ReentrancyGuard, Ownable {
      * @param _deadline The expiration timestamp of the signature (UNIX timestamp)
      * @param _fee The fee tier for the liquidity pool (in basis points, e.g., 3000 = 0.3%)
      * @param _transferTo address to transfer the swapped eth
-     * @return amountEthOut The actual amount of ETH received from the swap
+     * @return swappedAmountEth The actual amount of ETH received from the swap and sent to _transferTo
      */
     function swapErc20ToEthAndTransfer(
         // test msg.sender is still good
@@ -203,6 +203,8 @@ contract SwapERC20ToEthUniSwapV4 is PoolStateReader, ReentrancyGuard, Ownable {
                 _transferTo
             );
         }
+
+        return swappedAmountEth;
     }
 
     /**
