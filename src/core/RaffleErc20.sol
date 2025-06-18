@@ -1,11 +1,13 @@
-pragma solidity 0.8.24;
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.8.24;
 
 import "./RaffleAdminPayTaxVrf.sol";
 import {IswapContract} from "../interfaces/IswapContract.sol";
 
 /**
  * @title RaffleErc20
- * @author LEBEAU Pacôme
+ * @author Pakish https://github.com/Pakish
  * @notice Raffle contract managed by owner adress, defined when deploying the contract
  * the benefit of the raffle is also defined when deploying the contract, be sure where to send the benefit
  * Send the taxRate(%) of the benefit to address tax

@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
-// An example of a consumer contract that directly pays for each request.
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 import {ConfirmedOwner} from "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol";
 import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol";
@@ -8,15 +7,11 @@ import {VRFV2PlusWrapperConsumerBase} from "@chainlink/contracts/src/v0.8/vrf/de
 import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
 
 /**
- * Request testnet LINK and ETH here: https://faucets.chain.link/
- * Find information on LINK Token Contracts and get the latest ETH and LINK faucets here: https://docs.chain.link/docs/link-token-contracts/
+ * @title VrfRaffle
+ * @author Pakish https://github.com/Pakish
+ * @notice VrfRaffle contract that generate random number with oracle ChainLink VRF
+ * @dev Only authorized address can use it
  */
-
-/**
- * VrfRaffle contract that generate random number with oracle ChainLink VRF
- * Only authorized address can use it
- */
-
 contract VrfRaffle is VRFV2PlusWrapperConsumerBase, ConfirmedOwner {
     event RequestSent(uint256 requestId, uint32 numWords);
     event RequestFulfilled(

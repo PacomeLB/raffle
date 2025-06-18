@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: Unlicense
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
@@ -10,10 +10,11 @@ import "forge-std/console.sol";
 
 /**
  * @title AbstractRaffle
- * @author LEBEAU Pacôme
+ * @author Pakish https://github.com/Pakish
  * @notice Abstract contract for a raffle.
  * All tickets are minted as a NFT.
  */
+
 abstract contract AbstractRaffleOptimized is ERC721, ReentrancyGuard, Ownable {
     uint8 public immutable maxTickets;
     uint256 public immutable prize;

@@ -1,4 +1,6 @@
-pragma solidity 0.8.24;
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.8.24;
 
 import {AbstractRaffleOptimized} from "./AbstractRaffleOptimized.sol";
 import {IraffleVRF} from "../interfaces/IraffleVRF.sol";

@@ -8,6 +8,12 @@ import {PoolId, PoolIdLibrary} from "v4-core/types/PoolId.sol";
 import {StateLibrary} from "v4-core/libraries/StateLibrary.sol";
 import {IHooks} from "@uniswap/v4-core/src/interfaces/IHooks.sol";
 
+/**
+ * @title PoolStateReader
+ * @author Pakish https://github.com/Pakish
+ * @notice Uniswap basic pool state reader
+ */
+
 contract PoolStateReader {
     using PoolIdLibrary for PoolKey;
     using StateLibrary for IPoolManager;
