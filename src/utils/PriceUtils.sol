@@ -61,12 +61,15 @@ contract PriceUtils is PoolStateReader {
             _price,
             10 ** (_decimals + 18)
         );
+        console.log("amountInWithoutFees: %s", amountInWithoutFees);
 
         minAmountIn = FullMath.mulDiv(
             amountInWithoutFees,
             1000000,
             1000000 - totalFees
         );
+
+        console.log("minAmountIn with fees: %s", minAmountIn);
 
         return minAmountIn;
     }

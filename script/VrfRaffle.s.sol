@@ -12,7 +12,7 @@ contract VrfRaffleScript is Script {
     function run() public {
         vm.startBroadcast();
 
-        vrfRAffle = new VrfRaffle();
+        // vrfRAffle = new VrfRaffle();
 
         vm.stopBroadcast();
     }

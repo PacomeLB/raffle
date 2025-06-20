@@ -55,16 +55,18 @@ contract VrfRaffle is VRFV2PlusWrapperConsumerBase, ConfirmedOwner {
     uint32 public numWords = 1;
 
     // Address LINK - hardcoded for Sepolia
-    address public linkAddress = 0x779877A7B0D9E8603169DdbD7836e478b4624789;
+    address public immutable linkAddress;
 
     // address WRAPPER - hardcoded for Sepolia
-    address public wrapperAddress = 0x195f15F2d49d693cE265b4fB0fdDbE15b1850Cc1;
+    address public immutable wrapperAddress;
 
-    constructor()
-        ConfirmedOwner(msg.sender)
-        VRFV2PlusWrapperConsumerBase(wrapperAddress)
-    {
+    constructor(
+        address _linkAddress,
+        address _wrapperAddress
+    ) ConfirmedOwner(msg.sender) VRFV2PlusWrapperConsumerBase(_wrapperAddress) {
         setAuthorizedAddress(msg.sender);
+        wrapperAddress = _wrapperAddress;
+        linkAddress = _linkAddress;
     }
 
     function requestRandomWords(

@@ -3,6 +3,7 @@
 pragma solidity ^0.8.13;
 
 import {Script, console} from "forge-std/Script.sol";
+import {console} from "forge-std/console.sol";
 
 import {PriceUtils} from "../src/utils/PriceUtils.sol";
 
@@ -17,11 +18,16 @@ contract RaffleDeploySepolia is Script {
     ////////
     // Price utils
     PriceUtils public priceUtilsContract;
+    address public priceUtilsAddress;
 
     //////////
     // Vrf chainlink oracle
     VrfRaffle public vrfRAffleContract;
     address public vrfRAffleAddress;
+    address public constant vrfWrapperAddress =
+        0x195f15F2d49d693cE265b4fB0fdDbE15b1850Cc1;
+    address public constant linkAddress =
+        0x779877A7B0D9E8603169DdbD7836e478b4624789;
 
     //////////
     // Swap contract
@@ -69,16 +75,15 @@ contract RaffleDeploySepolia is Script {
         /////////
         // Price utils
         priceUtilsContract = new PriceUtils(poolManager);
+        priceUtilsAddress = address(priceUtilsContract);
 
         //////////
         // Vrf
-        vrfRAffleContract = new VrfRaffle();
+        vrfRAffleContract = new VrfRaffle(linkAddress, vrfWrapperAddress);
         vrfRAffleAddress = address(vrfRAffleContract);
 
         // Fund the conctract with 5 Link
-        LinkTokenInterface link = LinkTokenInterface(
-            vrfRAffleContract.linkAddress()
-        );
+        LinkTokenInterface link = LinkTokenInterface(linkAddress);
         require(link.transfer(vrfRAffleAddress, 5 ether), "Unable to transfer");
 
         //////////
@@ -109,6 +114,11 @@ contract RaffleDeploySepolia is Script {
 
         // Add raffle contract authorization to request randomwords
         vrfRAffleContract.setAuthorizedAddress(raffleAddress);
+
+        console.log("Price utils deployed at: %s", priceUtilsAddress);
+        console.log("Vrf chainlink oracle deployed at: %s", vrfRAffleAddress);
+        console.log("Swap deployed at: %s", swapAddress);
+        console.log("Raffle deployed at: %s", raffleAddress);
 
         vm.stopBroadcast();
     }

@@ -2,6 +2,8 @@
 
 pragma solidity ^0.8.24;
 
+import "forge-std/console.sol";
+
 import "./RaffleAdminPayTaxVrf.sol";
 import {IswapContract} from "../interfaces/IswapContract.sol";
 
@@ -68,8 +70,12 @@ contract RaffleErc20 is RaffleAdminPayTaxVrf {
         uint256 _deadline,
         uint24 _fee
     ) public nonReentrant returns (uint8) {
+        require(_nbTicketToBuyAsked > 0, "You must ask for at least 1 ticket");
+
         // Calculate min amount out to buy the ticket
         uint256 minAmountOutEth = _nbTicketToBuyAsked * ticketPrice;
+
+        console.log("Min amount eth calculated %s", minAmountOutEth);
         uint256 receivedAmountOutEth = swapContract.swapErc20ToEthAndTransfer(
             _signature,
             msg.sender,

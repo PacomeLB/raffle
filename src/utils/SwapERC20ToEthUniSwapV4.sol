@@ -183,7 +183,6 @@ contract SwapERC20ToEthUniSwapV4 is PoolStateReader, ReentrancyGuard, Ownable {
         uint24 _fee,
         address payable _transferTo
     ) external nonReentrant returns (uint256) {
-        console.log("In swap");
         uint256 swappedAmountEth = _swapErc20ToEth(
             _signature,
             _tokenOwner,
@@ -253,21 +252,21 @@ contract SwapERC20ToEthUniSwapV4 is PoolStateReader, ReentrancyGuard, Ownable {
         // Combine actions and params into inputs
         inputs[0] = abi.encode(actions, params);
 
-        console.log("before swap");
-
         // Execute the swap
         router.execute{value: 0}(commands, inputs, _deadline);
 
-        uint256 amountOut = IERC20(Currency.unwrap(_key.currency1)).balanceOf(
-            address(this)
-        );
+        uint256 amountOutEth = address(this).balance;
 
-        console.log("after swap");
+        uint256 amountOutErc20 = IERC20(Currency.unwrap(_key.currency1))
+            .balanceOf(address(this));
+
+        console.log("Amount swaped eth: %s", amountOutEth);
+        console.log("Amount left erc20: %s", amountOutErc20);
 
         // Check we have enough out. Revert if not.
-        require(amountOut >= _minAmountOut, "Insufficient output amount");
+        require(amountOutEth >= _minAmountOut, "Insufficient output amount");
 
-        return amountOut;
+        return amountOutEth;
     }
 
     /**

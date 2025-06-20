@@ -99,6 +99,8 @@ forge script script/PriceUtils.s.sol:PriceUtilsScript --rpc-url http://127.0.0.1
 
 forge script script/SwapERC20ToEthUniSwapV4.s.sol:SwapERC20ToEthUniSwapV4Script --rpc-url http://127.0.0.1:8545 --broadcast -vvvv --slow --private-key $PRIVATE_KEY_SEPOLIA
 
+forge script script/RaffleDeploySepolia.s.sol:RaffleDeploySepolia --rpc-url http://127.0.0.1:8545 --broadcast -vvvv --slow --private-key $PRIVATE_KEY_SEPOLIA
+
 # interact with contract on the fork
 
 cast code 0x782aEd4c8571fbD6B7BC7b6b2613fd6550d66C5d --rpc-url http://127.0.0.1:8545
