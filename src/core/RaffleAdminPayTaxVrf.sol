@@ -118,7 +118,7 @@ contract RaffleAdminPayTaxVrf is AbstractRaffleOptimized, ERC721URIStorage {
     /**
      * Launch the raffle to get a winner
      */
-    function launchRaffle() public override onlyOwner nonReentrant {
+    function launchRaffle() public virtual override onlyOwner nonReentrant {
         require(
             isRaffleFinished == false,
             "Raffle is finished yet, come back later!"

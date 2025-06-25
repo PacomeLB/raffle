@@ -44,6 +44,7 @@ contract RaffleDeploySepolia is Script {
     //////////
     // Raffle contract
     RaffleErc20 public raffleContract;
+    bool constant isLocalTest = true;
     address public raffleAddress;
     uint8 constant maxTickets = 4;
     uint256 constant prize = 1500000000000000; // 0.0015 eth
@@ -98,6 +99,7 @@ contract RaffleDeploySepolia is Script {
         //////////
         // Raffle
         raffleContract = new RaffleErc20(
+            isLocalTest,
             maxTickets,
             prize,
             ticketPrice,

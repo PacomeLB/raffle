@@ -19,7 +19,10 @@ contract RaffleErc20 is RaffleAdminPayTaxVrf {
     address public immutable swapContractAddress;
     IswapContract immutable swapContract;
 
+    bool immutable isLocalTest;
+
     constructor(
+        bool _isLocalTest,
         uint8 _maxTickets,
         uint256 _prize,
         uint256 _ticketPrice,
@@ -45,6 +48,7 @@ contract RaffleErc20 is RaffleAdminPayTaxVrf {
             _vrf
         )
     {
+        isLocalTest = _isLocalTest;
         swapContractAddress = _swapContractAddress;
         swapContract = IswapContract(swapContractAddress);
     }
@@ -162,4 +166,18 @@ contract RaffleErc20 is RaffleAdminPayTaxVrf {
      * Override receive to do nothing as we gonna receive eth from swap contract
      */
     receive() external payable override {}
+
+    /**
+     * Launch the raffle to get a winner
+     * In case of local test, use a fake random number generator
+     * Otherwise use the Link Vrf oracle
+     */
+    function launchRaffle() public override onlyOwner {
+        if (isLocalTest) {
+            console.log("local test");
+            AbstractRaffleOptimized.launchRaffle();
+        } else {
+            RaffleAdminPayTaxVrf.launchRaffle();
+        }
+    }
 }
