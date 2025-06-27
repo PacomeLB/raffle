@@ -14,7 +14,7 @@ import {console} from "forge-std/console.sol";
 
 /**
  * @title Contract for calculating prices and amounts in Uniswap V4 pools
- * @author Pakish https://github.com/Pakish
+ * @author Pacome LEBEAU https://github.com/PacomeLB
  * @notice Allows users calculate the minimum amount of an ERC20 token to swap to receive a certain amount of ETH. Get the best pool based on the price and liquidity.
  * @dev Uses Uniswap V4 pool state to calculate prices and amounts
  */

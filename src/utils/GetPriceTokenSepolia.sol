@@ -6,7 +6,7 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interf
 
 /**
  * @title GetPriceTokenSepolia
- * @author Pakish https://github.com/Pakish
+ * @author Pacome LEBEAU https://github.com/PacomeLB
  * @notice Get price from sepolia test n
  */
 
@@ -29,11 +29,11 @@ contract GetPriceTokenSepolia {
             ,
             //uint80 roundId
             int256 priceDataFeed, //uint256 startedA,
-            //uint256 updatedAt
+            //uint80 answeredInRound
             ,
             ,
 
-        ) = //uint80 answeredInRound
+        ) = //uint256 updatedAt
             linkEthPrice.latestRoundData();
 
         // Return price in Wei
@@ -50,11 +50,11 @@ contract GetPriceTokenSepolia {
             ,
             //uint80 roundId
             int256 priceDataFeed, //uint256 startedA,
-            //uint256 updatedAt
+            //uint80 answeredInRound
             ,
             ,
 
-        ) = //uint80 answeredInRound
+        ) = //uint256 updatedAt
             ethUsdPrice.latestRoundData();
 
         // Return price in Wei

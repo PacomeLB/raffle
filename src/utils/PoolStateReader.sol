@@ -10,7 +10,7 @@ import {IHooks} from "@uniswap/v4-core/src/interfaces/IHooks.sol";
 
 /**
  * @title PoolStateReader
- * @author Pakish https://github.com/Pakish
+ * @author Pacome LEBEAU https://github.com/PacomeLB
  * @notice Uniswap basic pool state reader
  */
 

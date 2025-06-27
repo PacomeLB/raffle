@@ -11,7 +11,7 @@ import "forge-std/console.sol";
 
 /**
  * @title RaffleAdminTax
- * @author LEBEAU Pacôme
+ * @author Pacome LEBEAU https://github.com/PacomeLB
  * @notice Raffle contract managed by owner adress, defined when deploying the contract
  * the benefit of the raffle is also defined when deploying the contract, be sure where to send the benefit
  * Send the taxRate(%) of the benefit to address tax

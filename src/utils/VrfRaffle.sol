@@ -8,7 +8,7 @@ import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/V
 
 /**
  * @title VrfRaffle
- * @author Pakish https://github.com/Pakish
+ * @author Pacome LEBEAU https://github.com/PacomeLB
  * @notice VrfRaffle contract that generate random number with oracle ChainLink VRF
  * @dev Only authorized address can use it
  */

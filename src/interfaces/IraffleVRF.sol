@@ -4,7 +4,7 @@ pragma solidity ^0.8.24;
 
 /**
  * @title IraffleVRF
- * @author Pakish https://github.com/Pakish
+ * @author Pacome LEBEAU https://github.com/PacomeLB
  * @notice Interface of the VrfRaffle contract that use chainlink Oracle
  */
 interface IraffleVRF {

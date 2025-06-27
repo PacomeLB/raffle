@@ -22,7 +22,7 @@ import {console} from "forge-std/console.sol";
 
 /**
  * @title Contract for swaping Erc20 token to Eth with uniswapV4
- * @author Pakish https://github.com/Pakish
+ * @author Pacome LEBEAU https://github.com/PacomeLB
  * @notice Allow user to swap Erc20 token to Eth via uniswapV4
  * @dev Uses Uniswap V4 pool state to calculate prices and amounts
  */

@@ -10,7 +10,7 @@ import "forge-std/console.sol";
 
 /**
  * @title AbstractRaffle
- * @author Pakish https://github.com/Pakish
+ * @author Pacome LEBEAU https://github.com/PacomeLB
  * @notice Abstract contract for a raffle.
  * All tickets are minted as a NFT.
  */
