@@ -1,137 +1,56 @@
-## Foundry
+# 🎟️ Raffle Smart Contract
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+A decentralized raffle system built with Solidity, featuring secure ownership patterns, token interoperability, and on-chain randomness. This project demonstrates modern Solidity development practices with integrations from Uniswap and Chainlink.
 
-Foundry consists of:
+---
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+## 🚀 Features
 
-## Documentation
+-   **Secure Smart Contract Architecture**
 
-https://book.getfoundry.sh/
+    -   `Ownable`: Restrict access to contract owner functions
+    -   `ReentrancyGuard`: Protect against reentrancy attacks
+    -   Custom **modifiers** for flexible access control
+    -   Solidity **inheritance** for modular contract design
 
-## Usage
+-   **Token Handling with Uniswap V4 and Permit2**
 
-### Build
+    -   Accept **ERC20 tokens** for raffle entries
+    -   Swap tokens via **Uniswap V4** directly in-contract
+    -   Use **Permit2** off-chain signatures for gasless approvals
 
-```shell
-$ forge build
-```
+-   **Ticket Minting with NFTs (ERC721)**
 
-### Test
+    -   Each raffle entry mints an **ERC721 ticket**
+    -   NFT images hosted on **IPFS** https://app.pinata.cloud/ipfs/files
 
-```shell
-$ forge test
-```
+-   **Fair Winner Selection with Chainlink VRF**
 
-### Format
+    -   Random winner is chosen using **Chainlink VRF Oracle**
+    -   Ensures tamper-proof and verifiable randomness
 
-```shell
-$ forge fmt
-```
+-   **Local Testing and Simulation**
+    -   Fork the **Sepolia testnet** locally using **Anvil**
+    -   Simulate contract interactions and Uniswap behavior
 
-### Gas Snapshots
+---
 
-```shell
-$ forge snapshot
-```
+## 🧱 Tech Stack
 
-### Anvil
+-   **Solidity** for smart contract development
+-   **Foundry** for testing and deployment
+-   **Chainlink VRF** for randomness
+-   **Uniswap V4** for token swaps
+-   **Permit2** for ERC20 signature-based approvals
+-   **IPFS** for NFT metadata and images
+-   **Anvil** for Sepolia chain forking and testing
 
-```shell
-$ anvil
-```
+---
 
-### Deploy
+## 📦 Installation
 
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
-
-### Deploying
-
-source .env
-
-# VRF
-
-forge script --chain sepolia script/VrfRaffle.s.sol:VrfRaffleScript --rpc-url $SEPOLIA_RPC_URL --broadcast --verify -vvvv --interactives 1
-
-# Raffle
-
-forge script --chain sepolia script/RaffleAdminPayTaxVrf.s.sol:RaffleAdminPayTaxVrfScript --rpc-url $SEPOLIA_RPC_URL --broadcast --verify -vvvv --interactives 1
-
-forge script --chain sepolia script/SwapERC20ToEthUniSwapV4.s.sol:SwapERC20ToEthUniSwapV4Script --rpc-url $SEPOLIA_RPC_URL --broadcast --verify -vvvv --interactives 1
-
-forge script --chain sepolia script/PriceUtils.s.sol:PriceUtilsScript --rpc-url $SEPOLIA_RPC_URL --broadcast --verify -vvvv --interactives 1
-
-https://sepolia.etherscan.io/tx/0xde655055445eb49b3e189cdef2b5fccc87a1b11bbb7ea4a8d5192a717e5a8141/advanced
-
-# Get Abi json format
-
-forge inspect PriceUtils abi --json > abi/PriceUtils.json
-
-forge inspect SwapERC20ToEthUniSwapV4 abi --json > abi/SwapERC20ToEthUniSwapV4.json
-
-# fork sepolia to local with chain id 31337 / 11155111 (same as sepolia to use permit 2)
-
-anvil --fork-url https://eth-sepolia.g.alchemy.com/v2/GBm__wLDvs_zeYjXn7L5Krw2RXBHWMeO --chain-id 11155111
-
-# Deploy on local fork (change private key to avoid contract colision: use my wallet key)
-
-forge script script/PriceUtils.s.sol:PriceUtilsScript --rpc-url http://127.0.0.1:8545 --broadcast -vvvv --slow --private-key $PRIVATE_KEY_SEPOLIA
-
-forge script script/SwapERC20ToEthUniSwapV4.s.sol:SwapERC20ToEthUniSwapV4Script --rpc-url http://127.0.0.1:8545 --broadcast -vvvv --slow --private-key $PRIVATE_KEY_SEPOLIA
-
-forge script script/RaffleDeploySepolia.s.sol:RaffleDeploySepolia --rpc-url http://127.0.0.1:8545 --broadcast -vvvv --slow --private-key $PRIVATE_KEY_SEPOLIA
-
-# interact with contract on the fork
-
-cast code 0x782aEd4c8571fbD6B7BC7b6b2613fd6550d66C5d --rpc-url http://127.0.0.1:8545
-cast balance 0x782aEd4c8571fbD6B7BC7b6b2613fd6550d66C5d --rpc-url http://127.0.0.1:8545
-
-cast call 0xContractAddress "function_signature()" \
- --rpc-url http://127.0.0.1:8545
-
-cast call 0x434b002AEa2D9721104bCAb8eAE8576FE884Ffe4 "MAX_LIQUIDITY_CHANGE()" --rpc-url http://127.0.0.1:8545
-
-cast call 0x434b002AEa2D9721104bCAb8eAE8576FE884Ffe4 "getMinAmountInFromErc20ToEth(address,uint256)((address, uint8, uint256, uint24,(uint256,uint256))[])" 0x779877A7B0D9E8603169DdbD7836e478b4624789 143774531092198 --rpc-url http://127.0.0.1:8545
-
-cast call 0x434b002AEa2D9721104bCAb8eAE8576FE884Ffe4 "getBestPool(address,uint256)((address, uint8, uint256, uint24,(uint256,uint256)))" 0x779877A7B0D9E8603169DdbD7836e478b4624789 143774531092198 --rpc-url http://127.0.0.1:8545
-
-# Usage of cast for debuging
-
-export swap=0x4dD3f964dC618d58569f70a1C8f57905D94bc4e0 // Swap contract address
-export paco=0x7a79A7c9338032B116051e9CC4459600F95fc35E // perso wallet address
-export unlucky=0xca4365A099eE5E9f20a1Dc8d325Ae8751A0cd87F // random wallet that has link
-export link=0x779877A7B0D9E8603169DdbD7836e478b4624789 // Link token address
-
-cast call $link "balanceOf(address)(uint256)" $paco // Call view / pure function on $link contract
-
-cast rpc anvil_impersonateAccount $paco // get control of account $paco in the fork
-cast rpc anvil_impersonateAccount $unlucky // get control of account $unlucky in the fork
-
-cast send $link --from $unlucky "transfer(address,uint256)(bool)" $paco 29000000000000000000 --unlocked // Send 29000000000000000000 Link token from $unlucky to paco
-
-// use fonction payWithLink on contract $swap
-// send to create a transaction, --unlocked to use controller account from anvil_impersonateAccount
-cast send $swap --from $paco --unlocked "payWithLink(bytes, address, uint256, uint256, uint256)" 0x64cdd75b9e2bcb6cc6474b6f23a0a39b3b707d362dc74a566fa2019cfd1f23b20dc6c95e44e56f0822c43571061c4188829702ee571001c734f1f15ae12a00d81b 0x7a79A7c9338032B116051e9CC4459600F95fc35E 1000000000000000000 1 1746716465
-
-// Debug transaction 0xf6efcd00ca724eed0177fd2eb276d597c11a12bb2ad92bca9dccb628954cbd31 from the fork
-cast run --debug 0xf6efcd00ca724eed0177fd2eb276d597c11a12bb2ad92bca9dccb628954cbd31
+1. Clone the repository:
+    ```bash
+    git clone https://github.com/your-username/raffle-contract.git
+    cd raffle-contract
+    ```

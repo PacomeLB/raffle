@@ -12,7 +12,6 @@ import "forge-std/console.sol";
  * @title AbstractRaffle
  * @author Pacome LEBEAU https://github.com/PacomeLB
  * @notice Abstract contract for a raffle.
- * All tickets are minted as a NFT.
  */
 
 abstract contract AbstractRaffleOptimized is ERC721, ReentrancyGuard, Ownable {
