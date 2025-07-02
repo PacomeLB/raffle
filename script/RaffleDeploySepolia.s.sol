@@ -8,7 +8,6 @@ import {console} from "forge-std/console.sol";
 import {PriceUtils} from "../src/utils/PriceUtils.sol";
 
 import {VrfRaffle} from "../src/utils/VrfRaffle.sol";
-import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol";
 
 import {SwapERC20ToEthUniSwapV4} from "../src/utils/SwapERC20ToEthUniSwapV4.sol";
 
@@ -81,11 +80,11 @@ contract RaffleDeploySepolia is Script {
         //////////
         // Vrf
         vrfRAffleContract = new VrfRaffle(linkAddress, vrfWrapperAddress);
-        vrfRAffleAddress = address(vrfRAffleContract);
+        vrfRAffleAddress = payable(address(vrfRAffleContract));
 
-        // Fund the conctract with 5 Link
-        LinkTokenInterface link = LinkTokenInterface(linkAddress);
-        require(link.transfer(vrfRAffleAddress, 5 ether), "Unable to transfer");
+        // Fund the conctract with 0.01 eth sepolia
+        (bool success, ) = vrfRAffleAddress.call{value: 0.01 ether}("");
+        require(success, "Funding vrf raffle failed!");
 
         //////////
         // Swap contract

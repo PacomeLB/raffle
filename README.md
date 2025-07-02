@@ -51,6 +51,6 @@ A decentralized raffle system built with Solidity, featuring secure ownership pa
 
 1. Clone the repository:
     ```bash
-    git clone https://github.com/your-username/raffle-contract.git
+    git clone https://github.com/PacomeLB/raffle.git
     cd raffle-contract
     ```

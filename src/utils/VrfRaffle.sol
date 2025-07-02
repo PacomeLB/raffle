@@ -50,14 +50,13 @@ contract VrfRaffle is VRFV2PlusWrapperConsumerBase, ConfirmedOwner {
     // The default is 3, but you can set this higher.
     uint16 public requestConfirmations = 3;
 
-    // For this example, retrieve 2 random values in one request.
-    // Cannot exceed VRFV2Wrapper.getConfig().maxNumWords.
+    // Retrieve 1 random
     uint32 public numWords = 1;
 
-    // Address LINK - hardcoded for Sepolia
+    // Address LINK
     address public immutable linkAddress;
 
-    // address WRAPPER - hardcoded for Sepolia
+    // address WRAPPER
     address public immutable wrapperAddress;
 
     constructor(
