@@ -1,10 +1,10 @@
-# 🎟️ Raffle Smart Contract
+# Raffle Smart Contract
 
 A decentralized raffle system built with Solidity, featuring secure ownership patterns, token interoperability, and on-chain randomness. This project demonstrates modern Solidity development practices with integrations from Uniswap and Chainlink.
 
 ---
 
-## 🚀 Features
+## Features
 
 -   **Secure Smart Contract Architecture**
 
@@ -35,7 +35,7 @@ A decentralized raffle system built with Solidity, featuring secure ownership pa
 
 ---
 
-## 🧱 Tech Stack
+## Tech Stack
 
 -   **Solidity** for smart contract development
 -   **Foundry** for testing and deployment
@@ -47,7 +47,7 @@ A decentralized raffle system built with Solidity, featuring secure ownership pa
 
 ---
 
-## 📦 Installation
+## Installation
 
 1. Clone the repository:
     ```bash
