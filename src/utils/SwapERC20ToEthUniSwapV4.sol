@@ -143,7 +143,7 @@ contract SwapERC20ToEthUniSwapV4 is PoolStateReader, ReentrancyGuard, Ownable {
         uint256 _nonce,
         uint256 _deadline,
         uint24 _fee
-    ) external returns (uint256) {
+    ) external nonReentrant returns (uint256) {
         return
             _swapErc20ToEth(
                 _signature,
