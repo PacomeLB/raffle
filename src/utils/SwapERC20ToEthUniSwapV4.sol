@@ -168,7 +168,7 @@ contract SwapERC20ToEthUniSwapV4 is PoolStateReader, ReentrancyGuard, Ownable {
      * @param _nonce The unique nonce value for this signature
      * @param _deadline The expiration timestamp of the signature (UNIX timestamp)
      * @param _fee The fee tier for the liquidity pool (in basis points, e.g., 3000 = 0.3%)
-     * @param _transferTo address to transfer the swapped eth
+     * @param _transferTo Address to transfer the swapped eth
      * @return swappedAmountEth The actual amount of ETH received from the swap and sent to _transferTo
      */
     function swapErc20ToEthAndTransfer(
@@ -208,7 +208,7 @@ contract SwapERC20ToEthUniSwapV4 is PoolStateReader, ReentrancyGuard, Ownable {
 
     /**
      * @dev Allow user to swap Erc20 token to Eth via uniswapV4 with an exact input
-     * @return uint256  The amount out of eth swaped
+     * @return The amount out of eth swaped
      */
     function swapExactInputSingleTokenToEth(
         PoolKey memory _key, // PoolKey struct that identifies the v4 pool
@@ -271,22 +271,27 @@ contract SwapERC20ToEthUniSwapV4 is PoolStateReader, ReentrancyGuard, Ownable {
 
     /**
      * @dev Approuve permit2 to spend an erc20 token and the Urouter to spend permit2
+     * @param _token Address of the token to be approved
+     * @param _amount Amount of token to be approved (wei)
+     * @param _expiration Validity timestamp
      */
     function approveTokenWithPermit2(
-        address token,
-        uint160 amount,
-        uint48 expiration
+        address _token,
+        uint160 _amount,
+        uint48 _expiration
     ) internal {
-        IERC20(token).approve(address(permit2), type(uint256).max);
-        permit2.approve(token, address(router), amount, expiration);
+        IERC20(_token).approve(address(permit2), type(uint256).max);
+        permit2.approve(_token, address(router), _amount, _expiration);
     }
 
-    // Receive eth from withdraw
+    /**
+     * @dev Receive eth from withdraw
+     */
     receive() external payable {}
 
     /**
-     * Withdraw the raffle contract to the owner
-     * Security function for testing purposes
+     * @dev Withdraw the raffle contract to the owner
+     * Security function for testing purpose only
      */
     function withdrawContract() external {
         uint256 withdrawAmout = address(this).balance;
@@ -295,7 +300,8 @@ contract SwapERC20ToEthUniSwapV4 is PoolStateReader, ReentrancyGuard, Ownable {
     }
 
     /**
-     * Allow withdraw of an erc20 token from the contract
+     * @dev Allow withdraw of an erc20 token from the contract
+     * @param _token Address of the token to withdraw
      */
     function withdrawErc20Token(address _token) external {
         IERC20 erc20Token = IERC20(_token);

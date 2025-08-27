@@ -7,7 +7,8 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interf
 /**
  * @title GetPriceTokenSepolia
  * @author Pacome LEBEAU https://github.com/PacomeLB
- * @notice Get price from sepolia test n
+ * @dev Get price from sepolia test network
+ * For test only
  */
 
 contract GetPriceTokenSepolia {
@@ -20,7 +21,8 @@ contract GetPriceTokenSepolia {
     constructor() {}
 
     /**
-     * Return Link / Eth price in wei
+     * @dev Get price of Link/Eth
+     * @return priceWei price in wei
      */
     function getLinkEthPriceWei() public view returns (uint256 priceWei) {
         uint8 decimals = linkEthPrice.decimals();
@@ -41,7 +43,8 @@ contract GetPriceTokenSepolia {
     }
 
     /**
-     * Return Eth / USD price in wei
+     * @dev Return Eth / USD price in wei
+     * @return priceWei price of the 1wei in US dollar
      */
     function getEthUsdPriceWei() internal view returns (uint256 priceWei) {
         uint8 decimals = ethUsdPrice.decimals();

@@ -11,7 +11,7 @@ import {IHooks} from "@uniswap/v4-core/src/interfaces/IHooks.sol";
 /**
  * @title PoolStateReader
  * @author Pacome LEBEAU https://github.com/PacomeLB
- * @notice Uniswap basic pool state reader
+ * @dev Uniswap basic pool state reader
  */
 
 contract PoolStateReader {
@@ -41,25 +41,27 @@ contract PoolStateReader {
     }
 
     /**
-     * Get the tickspacing linked to the fee
-     * @return int24 the tickspacing
+     * @dev Get the tickspacing linked to the fee
+     * @param _fee The fee
+     * @return The tickspacing for the _fee
      */
-    function getTickSpacingFromFee(uint24 fee) internal pure returns (int24) {
-        if (fee == 500) return 10;
-        if (fee == 3000) return 60;
-        if (fee == 10000) return 200;
+    function getTickSpacingFromFee(uint24 _fee) internal pure returns (int24) {
+        if (_fee == 500) return 10;
+        if (_fee == 3000) return 60;
+        if (_fee == 10000) return 200;
         revert("Invalid fee");
     }
 
     /**
-     * Get slot0 of the pool
+     * @dev Get slot0 of the pool
+     * @param _key The pool key
      * @return sqrtPriceX96 current price token0 / token1
      * @return tick current tick of the pool
      * @return protocolFee
      * @return lpFee fee of the pool
      */
     function getPoolState(
-        PoolKey calldata key
+        PoolKey calldata _key
     )
         public
         view
@@ -70,10 +72,11 @@ contract PoolStateReader {
             uint24 lpFee
         )
     {
-        return poolManager.getSlot0(key.toId());
+        return poolManager.getSlot0(_key.toId());
     }
 
-    /** Get all pool states for a given ERC20 token
+    /**
+     * @dev Get all pool states for a given ERC20 token
      * @param _tokenERC20 The address of the ERC20 token
      * @return poolInfos An array of PoolInfo structs containing the state of each pool with fees 500, 3000, and 10000
      */
@@ -147,7 +150,8 @@ contract PoolStateReader {
         return poolInfos;
     }
 
-    /** Create a pool key for a given ERC20 token
+    /**
+     * @dev Create a pool key for a given ERC20 token
      * @param _tokenERC20 The address of the ERC20 token
      * @param _fee The fee tier for the pool
      * @param _tickSpacing The tick spacing for the pool
@@ -168,6 +172,9 @@ contract PoolStateReader {
             });
     }
 
+    /**
+     * @dev Emit PoolState event
+     */
     function emitPoolState(PoolKey calldata key) internal {
         (
             uint160 sqrtPriceX96,

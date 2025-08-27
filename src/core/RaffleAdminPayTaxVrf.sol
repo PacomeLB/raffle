@@ -49,17 +49,18 @@ contract RaffleAdminPayTaxVrf is AbstractRaffleOptimized, ERC721URIStorage {
     );
 
     /**
-     * Contrustor for a raffle with VRF from Chainlink
-     * @param _maxTickets number of tickets of the raffle (max 255)
-     * @param _prize prize to win in Wei
-     * @param _ticketPrice price of one ticket in Wei
-     * @param _owner owner address of the raffle
-     * @param _benefit benefit address of the raffle, after paying tax and winner, benefit will get the benefit of the raffle
-     * @param _taxRate tax rate of the benefit to pay in %
-     * @param _tax address to send the tax to
+     * @notice Contrustor for a raffle with VRF from Chainlink
+     * @param _maxTickets Number of tickets of the raffle (max 255)
+     * @param _prize Prize to win in Wei
+     * @param _ticketPrice Price of one ticket in Wei
+     * @param _owner Owner address of the raffle
+     * @param _benefit Benefit address of the raffle, after paying tax and winner
+     * Benefit will get the benefit of the raffle
+     * @param _taxRate Tax rate of the benefit to pay in %
+     * @param _tax Address to send the tax to
      * @param _name NFT token name
-     * @param _tokenURIHashs array of the URI hash associated with the raffle NFT
-     * @param _vrf address of the VRF interface contract to get a random number
+     * @param _tokenURIHashs Array of the URI hash associated with the raffle NFT
+     * @param _vrf Address of the VRF interface contract to get a random number
      */
     constructor(
         uint8 _maxTickets,
@@ -116,7 +117,7 @@ contract RaffleAdminPayTaxVrf is AbstractRaffleOptimized, ERC721URIStorage {
     }
 
     /**
-     * Launch the raffle to get a winner
+     * @notice Launch the raffle to get a winner
      */
     function launchRaffle() public virtual override onlyOwner nonReentrant {
         require(
@@ -141,7 +142,7 @@ contract RaffleAdminPayTaxVrf is AbstractRaffleOptimized, ERC721URIStorage {
     }
 
     /**
-     * Ensure that benefit are only sent to the address defined when deploying contract
+     * @notice Ensure that benefit are only sent to the address defined when deploying contract
      */
     function withdrawBenefit(
         address payable /*_unused*/
@@ -171,35 +172,35 @@ contract RaffleAdminPayTaxVrf is AbstractRaffleOptimized, ERC721URIStorage {
     }
 
     /**
-     * Reset the raffle to its initial state
+     * @dev Reset the raffle to its initial state
      */
     function _resetContract() internal override {
         require(
             isRaffleFinished == true,
             "You can only reset this contract once the raffle is finished."
         );
-        resetNTFTickets();
+        _resetNTFTickets();
         currentTickets = 0;
         isRaffleFinished = false;
         emit RaffleReset("Raffle has been reset");
     }
 
     /**
-     * For dev only
-     * Reset the contract to its initial state
+     * @notice Reset the contract to its initial state
+     * @dev For test purpose only
      */
     function resetContract() external override onlyOwner nonReentrant {
         withdrawContract();
         isRaffleFinished = false;
-        resetNTFTickets();
+        _resetNTFTickets();
         currentTickets = 0;
         isVrfRequested = false;
         vrfRequestId = 0;
     }
 
     /**
-     * Withdraw the raffle contract to the owner
-     * Security function for testing purposes
+     * @dev Withdraw the raffle contract to the owner
+     * Security function for test purpose only
      */
     function withdrawContract() internal {
         uint256 benefitToSend = address(this).balance;
@@ -208,19 +209,25 @@ contract RaffleAdminPayTaxVrf is AbstractRaffleOptimized, ERC721URIStorage {
     }
 
     /**
-     * Calculate the tax amount to send to the government
-     * benefit * (%)tax level
+     * @notice Calculate the tax amount to send to the government
+     * @dev benefit * (%)tax level
      */
     function getTaxAmount() private view returns (uint256 taxAmountToSend) {
         return (((maxTickets * ticketPrice) - prize) * taxRate) / 100;
     }
 
+    /**
+     * @dev Resolve multiple inheritance
+     */
     function supportsInterface(
         bytes4 interfaceId
     ) public view virtual override(ERC721, ERC721URIStorage) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 
+    /**
+     * @dev Resolve multiple inheritance
+     */
     function tokenURI(
         uint256 _tokenId
     )
@@ -233,14 +240,17 @@ contract RaffleAdminPayTaxVrf is AbstractRaffleOptimized, ERC721URIStorage {
         return super.tokenURI(_tokenId);
     }
 
-    // Actually useless
-    function safeMint(address _sender, uint256 _tokenID) internal override {
-        super.safeMint(_sender, _tokenID);
+    /**
+     * @dev Actually useless
+     */
+    function _safeMinter(address _sender, uint256 _tokenID) internal override {
+        super._safeMinter(_sender, _tokenID);
     }
 
     /**
-     * This function allows oracle VRF to set the random number
-     * Used as an interface
+     * @dev Allows oracle VRF to set the random number, used as an interface
+     * @param _requestId The id of the chainlink request
+     * @param _randomNumbers Array of random numbers
      */
     function setRandomNumber(
         uint256 _requestId,
@@ -258,8 +268,8 @@ contract RaffleAdminPayTaxVrf is AbstractRaffleOptimized, ERC721URIStorage {
     }
 
     /**
-     * Get a winner and send the prize
-     * @param _randomNumber random number to get the winner
+     * @dev Get a winner and send the prize
+     * @param _randomNumber Random number to get the winner
      */
     function getWinner(uint256 _randomNumber) internal {
         uint8 winnerTicket = uint8(_randomNumber % maxTickets);
@@ -277,7 +287,7 @@ contract RaffleAdminPayTaxVrf is AbstractRaffleOptimized, ERC721URIStorage {
     }
 
     /**
-     * Authorize only from the vrfContractAddress
+     * @dev Authorize only from the vrfContractAddress
      */
     modifier onlyRaffleVRF(string memory _refusedMessage) {
         require(msg.sender == vrfContractAddress, _refusedMessage);

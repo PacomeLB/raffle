@@ -11,7 +11,7 @@ import {IswapContract} from "../interfaces/IswapContract.sol";
  * @title RaffleErc20
  * @author Pacome LEBEAU https://github.com/PacomeLB
  * @notice Raffle contract managed by owner adress, defined when deploying the contract
- * the benefit of the raffle is also defined when deploying the contract, be sure where to send the benefit
+ * The benefit of the raffle is also defined when deploying the contract, be sure where to send the benefit
  * Send the taxRate(%) of the benefit to address tax
  */
 
@@ -56,7 +56,7 @@ contract RaffleErc20 is RaffleAdminPayTaxVrf {
     /**
      * @notice Buy raffle ticket with an Erc20 token. Swap it and buy ticket with the swapped eth
      * @dev Performs a token swap using Permit2 for gasless approval
-     * @param _nbTicketToBuyAsked number of ticket the buyer wants to buy
+     * @param _nbTicketToBuyAsked Number of ticket the buyer wants to buy
      * @param _signature The EIP712 signature for Permit2 authorization
      * @param _tokenErc20 The address of the ERC20 token to swap
      * @param _amountErc20In The exact amount of ERC20 tokens to swap
@@ -97,11 +97,12 @@ contract RaffleErc20 is RaffleAdminPayTaxVrf {
     }
 
     /**
-     * Internal buy tickets with ether and mint nft
+     * @dev Internal buy tickets with ether and mint nft
      * Should only be call after receiving eth from a swap
-     * @param _nbTicketToBuyAsked number of ticket that player wants to buy
-     * @param _swappedEthAmount the amount of wei eth we received from the swap
-     * @param _buyerAddress the address of the ticket buyer
+     * @param _nbTicketToBuyAsked Number of ticket that player wants to buy
+     * @param _swappedEthAmount The amount of wei eth we received from the swap
+     * @param _buyerAddress The address of the ticket buyer
+     * @return uint8 The number of tickets bought
      */
     function _buyTickets(
         uint8 _nbTicketToBuyAsked,
@@ -163,12 +164,12 @@ contract RaffleErc20 is RaffleAdminPayTaxVrf {
     }
 
     /**
-     * Override receive to do nothing as we gonna receive eth from swap contract
+     * @dev Override receive to do nothing as we gonna receive eth from swap contract
      */
     receive() external payable override {}
 
     /**
-     * Launch the raffle to get a winner
+     * @dev Launch the raffle to get a winner
      * In case of local test, use a fake random number generator
      * Otherwise use the Link Vrf oracle
      */

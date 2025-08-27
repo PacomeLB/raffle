@@ -39,12 +39,13 @@ contract PriceUtils is PoolStateReader {
     }
 
     /**
-     * Calculate minimum amount of an ERC20 token to swap to receive a certain amount of ETH
+     * @notice Calculate minimum amount of an ERC20 token to swap to receive a certain amount of ETH
      * Add a 1% of slippage tolerance
-     * @param _amountEthWei min amount of eth to received in wei
-     * @param _price price of the pairs in wei
-     * @param _fees the fee tier for the pool in (1/1 000 000)
-     * @return minAmountIn the minimum amount of the ERC20 token to swap in wei or decimals of the token
+     * @param _amountEthWei Minimum amount of eth to received in wei
+     * @param _price Price of the pairs in wei
+     * @param _fees The fee tier for the pool in (1/1 000 000)
+     * @param _decimals number of decimals of the token
+     * @return minAmountIn The minimum amount of the ERC20 token to swap in wei or decimals of the token
      */
     function calculateAmountIn(
         uint256 _amountEthWei,
@@ -75,9 +76,9 @@ contract PriceUtils is PoolStateReader {
     }
 
     /**
-     * Convert a Uniswap V4 sqrt price to a price in wei
-     * @param _sqrtPriceX96 the sqrt price in X96 format
-     * @param _decimals the number of decimals for the token
+     * @notice Convert a Uniswap V4 sqrt price to a price in wei
+     * @param _sqrtPriceX96 The sqrt price in X96 format
+     * @param _decimals The number of decimals for the token
      */
     function getPriceFromSqrtPriceX96(
         uint160 _sqrtPriceX96,
@@ -95,9 +96,9 @@ contract PriceUtils is PoolStateReader {
 
     /**
      * @notice Get PriceInfo array with pool info for a minimum amount of an ERC20 token to swap to receive a certain amount of ETH
-     * @param _tokenERC20 the address of the ERC20 token
-     * @param _amountEthWei the minimum amount of ETH to receive in wei
-     * @return priceInfos an array of PriceInfo structs containing the minimum amount of the ERC20 token to swap
+     * @param _tokenERC20 The address of the ERC20 token
+     * @param _amountEthWei The minimum amount of ETH to receive in wei
+     * @return priceInfos An array of PriceInfo structs containing the minimum amount of the ERC20 token to swap
      * PriceInfo {address tokenERC20;uint8 decimals; uint256 tokenAmountDecimals; uint24 feeTier;}
      */
     function getSwapPriceInfoForMinAmountInFromErc20ToEth(
@@ -134,8 +135,8 @@ contract PriceUtils is PoolStateReader {
 
     /**
      * @notice Get the approximate liquidity of a Uniswap V4 pool
-     * @param _poolInfo the PoolInfo struct containing the state of the pool
-     * @return liquidityInfo a LiquidityInfo struct containing the liquidity in ETH wei and ERC20 token decimals
+     * @param _poolInfo The PoolInfo struct containing the state of the pool
+     * @return liquidityInfo A LiquidityInfo struct containing the liquidity in ETH wei and ERC20 token decimals
      */
     function getTokenLiquidity(
         PoolInfo memory _poolInfo
@@ -163,9 +164,9 @@ contract PriceUtils is PoolStateReader {
 
     /**
      * @notice Select the best pool based on the price and liquidity
-     * @param _priceInfos an array of PriceInfo structs containing the price and liquidity of each pool
-     * @param _amountEthWei the minimum amount of ETH to receive in wei
-     * @return selectedPriceInfo the PriceInfo struct of the selected pool
+     * @param _priceInfos An array of PriceInfo structs containing the price and liquidity of each pool
+     * @param _amountEthWei The minimum amount of ETH to receive in wei
+     * @return selectedPriceInfo The PriceInfo struct of the selected pool
      */
     function selectPool(
         PriceInfo[] memory _priceInfos,

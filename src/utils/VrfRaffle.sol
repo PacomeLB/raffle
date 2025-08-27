@@ -21,6 +21,7 @@ contract VrfRaffle is VRFV2PlusWrapperConsumerBase, ConfirmedOwner {
     );
 
     event AddingAuthorizedAddress(string message, address _authorized);
+    event Received(address, uint256);
 
     struct RequestStatus {
         uint256 paid; // amount paid in link
@@ -68,6 +69,10 @@ contract VrfRaffle is VRFV2PlusWrapperConsumerBase, ConfirmedOwner {
         linkAddress = _linkAddress;
     }
 
+    /**
+     * @dev Send a request to chainlink Vrf oracle
+     * @param enableNativePayment Pay in native token (ether) of Link
+     */
     function requestRandomWords(
         bool enableNativePayment
     ) external onlyAuthorized returns (uint256) {
@@ -103,6 +108,11 @@ contract VrfRaffle is VRFV2PlusWrapperConsumerBase, ConfirmedOwner {
         return requestId;
     }
 
+    /**
+     * @dev Called when random words request is fulfilled
+     * @param _requestId Id of the random words request
+     * @param _randomWords Array of random words
+     */
     function fulfillRandomWords(
         uint256 _requestId,
         uint256[] memory _randomWords
@@ -125,6 +135,13 @@ contract VrfRaffle is VRFV2PlusWrapperConsumerBase, ConfirmedOwner {
         }
     }
 
+    /**
+     * @notice Get the status of a Vrf oracle request
+     * @param _requestId Id of the request
+     * @return paid Amount for the request
+     * @return fulfilled True if the request has been fulfilled, false otherwise
+     * @return randomWords The random words of the request
+     */
     function getRequestStatus(
         uint256 _requestId
     )
@@ -138,7 +155,7 @@ contract VrfRaffle is VRFV2PlusWrapperConsumerBase, ConfirmedOwner {
     }
 
     /**
-     * Allow withdraw of Link tokens from the contract
+     * @notice Allow withdraw of Link tokens from the contract
      */
     function withdrawLink() public onlyOwner {
         LinkTokenInterface link = LinkTokenInterface(linkAddress);
@@ -148,31 +165,31 @@ contract VrfRaffle is VRFV2PlusWrapperConsumerBase, ConfirmedOwner {
         );
     }
 
-    /// @notice withdrawNative withdraws the amount specified in amount to the owner
-    /// @param amount the amount to withdraw, in wei
+    /**
+     * @notice withdrawNative withdraws the amount specified in amount to the owner
+     * @param amount The amount to withdraw, in wei
+     */
     function withdrawNative(uint256 amount) external onlyOwner {
         (bool success, ) = payable(owner()).call{value: amount}("");
         // solhint-disable-next-line gas-custom-errors
         require(success, "withdrawNative failed");
     }
 
-    event Received(address, uint256);
-
     receive() external payable {
         emit Received(msg.sender, msg.value);
     }
 
     /**
-     * Set the callback gas limit
-     * @param _gasLimit to set
+     * @dev Set the callback gas limit
+     * @param _gasLimit To set
      */
     function setcallbackGasLimit(uint32 _gasLimit) external onlyOwner {
         callbackGasLimit = _gasLimit;
     }
 
     /**
-     * Add authorized address
-     * @param _authorizedAddress contract address authorized to call the random number generator
+     * @notice Add authorized address
+     * @param _authorizedAddress Contract address authorized to call the random number generator
      */
     function setAuthorizedAddress(address _authorizedAddress) public onlyOwner {
         authorizedConsumers[_authorizedAddress] = true;
@@ -183,7 +200,7 @@ contract VrfRaffle is VRFV2PlusWrapperConsumerBase, ConfirmedOwner {
     }
 
     /**
-     * Check that the address caller is in the authorized address list
+     * @dev Check that the address caller is in the authorized address list
      */
     modifier onlyAuthorized() {
         require(
@@ -194,6 +211,9 @@ contract VrfRaffle is VRFV2PlusWrapperConsumerBase, ConfirmedOwner {
     }
 }
 
+/**
+ * @dev Interface of the contract to send the random number
+ */
 interface IrandomNumberConsumer {
     function setRandomNumber(
         uint256 _requestId,

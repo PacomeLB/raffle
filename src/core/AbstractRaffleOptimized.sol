@@ -11,14 +11,15 @@ import "forge-std/console.sol";
 /**
  * @title AbstractRaffle
  * @author Pacome LEBEAU https://github.com/PacomeLB
- * @notice Abstract contract for a raffle.
+ * @notice Abstract contract for the raffle
+ * @dev Contract with gas optimization
  */
 
 abstract contract AbstractRaffleOptimized is ERC721, ReentrancyGuard, Ownable {
-    uint8 public immutable maxTickets;
-    uint256 public immutable prize;
+    uint8 public immutable maxTickets; // Maximum ticket to sell
+    uint256 public immutable prize; // Prize of the raffle
     uint8 public currentTickets = 0;
-    uint256 public immutable ticketPrice;
+    uint256 public immutable ticketPrice; // Price of 1 ticket
     bool internal isRaffleFinished = false;
 
     event YourParticipation(address indexed _player, uint8 _NFTnumber);
@@ -50,15 +51,17 @@ abstract contract AbstractRaffleOptimized is ERC721, ReentrancyGuard, Ownable {
     }
 
     /**
-     * return uint256 the price of 1 ticket in Wei
+     * @notice Get the price of a unit ticket
+     * @return The price of 1 ticket in Wei
      */
     function getTicketPrice() public view returns (uint256) {
         return ticketPrice;
     }
 
     /**
-     * Buy tickets with ether and mint nft
-     * @param _nbTicketToBuyAsked number of ticket that player wants to buy
+     * @notice Buy tickets with ether and mint nft
+     * Send back the excess amount of ether
+     * @param _nbTicketToBuyAsked Number of ticket that player wants to buy
      */
     function buyTickets(
         uint8 _nbTicketToBuyAsked
@@ -116,8 +119,7 @@ abstract contract AbstractRaffleOptimized is ERC721, ReentrancyGuard, Ownable {
     }
 
     /**
-     * Direct call to contract
-     * Try to buy as much as ticket as possible
+     * @notice Direct call to contract, try to buy as much as ticket as possible
      */
     receive() external payable virtual {
         uint256 maxTicketBuyable = msg.value / ticketPrice;
@@ -130,27 +132,29 @@ abstract contract AbstractRaffleOptimized is ERC721, ReentrancyGuard, Ownable {
     }
 
     /**
-     * Return number of available tickets
+     * @notice Get number of available tickets
+     * @return The number of tickets that can be bought
      */
     function availableTickets() public view returns (uint8) {
         return maxTickets - currentTickets;
     }
 
     /**
-     * Allow to override the default behaviour in child contract
-     * @param _sender address to associate the NFT with
-     * @param tokenID the token to associate with the address (a ticket number here)
+     * @dev Allow to override the default behaviour in child contract
+     * @param _sender Address to associate the NFT with
+     * @param _tokenID The token to associate with the address (a ticket number here)
      */
-    function safeMint(address _sender, uint256 tokenID) internal virtual {
-        super._safeMint(_sender, tokenID);
+    function _safeMinter(address _sender, uint256 _tokenID) internal virtual {
+        super._safeMint(_sender, _tokenID);
     }
 
     /**
-     * Mint a NFT with _sender, the NFT is the ticket
-     * @param _sender address of the ticket buyer to associate with the NFT
+     * @dev Mint a NFT with _sender, the NFT is the ticket
+     * @param _sender Address of the ticket buyer to associate with the NFT
+     * @return True if the nft has been minted, false otherwise
      */
     function participateAndNFT(address _sender) internal returns (bool) {
-        safeMint(_sender, currentTickets);
+        _safeMinter(_sender, currentTickets);
 
         // Check that token has been minted correctly
         if (_ownerOf(currentTickets) == _sender) {
@@ -168,7 +172,8 @@ abstract contract AbstractRaffleOptimized is ERC721, ReentrancyGuard, Ownable {
     }
 
     /**
-     * Launch the raffle, please add a modifier in child contract to limit usage
+     * @dev Launch the raffle
+     * Please add a modifier in child contract to limit usage
      * Emit event with the winner address and its prize
      */
     function launchRaffle() public virtual nonReentrant {
@@ -193,42 +198,48 @@ abstract contract AbstractRaffleOptimized is ERC721, ReentrancyGuard, Ownable {
     }
 
     /**
-     * Transfer the contract balance to _benefit address
-     * @param _benefit to send the contract balance to
+     * @notice Transfer the contract balance to _benefit address
+     * @param _benefit To send the contract balance to
      */
     function withdrawBenefit(address payable _benefit) public virtual;
 
     /**
-     * Reset the raffle to its initial state
+     * @dev Reset the raffle to its initial state
      */
     function _resetContract() internal virtual {
         require(
             isRaffleFinished == true,
             "You can only reset this contract once the raffle is finished."
         );
-        resetNTFTickets();
+        _resetNTFTickets();
         currentTickets = 0;
         isRaffleFinished = false;
         emit RaffleReset("Raffle has been reset");
     }
 
+    /**
+     * @notice Reset the contract from outside
+     * @dev Only for development purpose
+     * Make sure to override it for production deployment
+     */
     function resetContract() external virtual nonReentrant {
         _resetContract();
     }
 
     /**
-     * Reset all nft that has been minted
+     * @dev Reset / burn all nft that has been minted
      */
-    function resetNTFTickets() internal {
+    function _resetNTFTickets() internal {
         for (uint8 i = 0; i < currentTickets; i++) {
             _burn(i);
         }
     }
 
     /**
-     * Return a random number between _min and _max included
-     * @param _min the minimum number to return (from 0)
-     * @param _max the maximum number to return (until 255 included)
+     * @dev Get an "almost" random  number between _min and _max included
+     * @param _min The minimum number to return (from 0)
+     * @param _max The maximum number to return (until 255 included)
+     * @return The random number generated
      */
     function getRandom(
         uint8 _min,
