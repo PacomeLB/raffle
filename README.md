@@ -50,7 +50,22 @@ A decentralized raffle system built with Solidity, featuring secure ownership pa
 ## Installation
 
 1. Clone the repository:
+
     ```bash
     git clone https://github.com/PacomeLB/raffle.git
-    cd raffle-contract
+    cd raffle/lib/
+    git clone https://github.com/PacomeLB/v3-periphery.git
+    cd v3-periphery
+    git checkout fix_INonfungiblePositionManager_import_openzeppelin
+    cd ../
+    git clone https://github.com/OpenZeppelin/openzeppelin-contracts.git
+    git clone https://github.com/smartcontractkit/chainlink-brownie-contracts.git
+    git clone https://github.com/Uniswap/v4-core.git
+    git clone https://github.com/Uniswap/universal-router.git
+    git clone https://github.com/Uniswap/v4-periphery.git
+    git clone --recurse-submodules https://github.com/Uniswap/permit2.git
+    git clone https://github.com/Uniswap/v2-core.git
+    git clone https://github.com/Uniswap/v3-core.git
+    cd ..
+    forge build
     ```
