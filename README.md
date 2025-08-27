@@ -53,15 +53,16 @@ A decentralized raffle system built with Solidity, featuring secure ownership pa
 
     ```bash
     git clone https://github.com/PacomeLB/raffle.git
+    cd raffle
     forge install --no-git PacomeLB/v3-periphery@fix_INonfungiblePositionManager_import_openzeppelin
-    forge install --no-git OpenZeppelin/openzeppelin-contracts@v5.4.0
-    forge install --no-git smartcontractkit/chainlink-brownie-contracts@1.3.0
-    forge install --no-git Uniswap/v4-core@v4.0.0
-    forge install --no-git Uniswap/universal-router@v1.6.0
+    forge install --no-git OpenZeppelin/openzeppelin-contracts
+    forge install --no-git smartcontractkit/chainlink-brownie-contracts
+    forge install --no-git Uniswap/v4-core
+    forge install --no-git Uniswap/universal-router
     forge install --no-git Uniswap/v4-periphery
     forge install --no-git Uniswap/permit2
     forge install --no-git https://github.com/Uniswap/v2-core.git
     forge install --no-git https://github.com/Uniswap/v3-core.git
-    forge install foundry-rs/forge-std
+    forge install --no-git foundry-rs/forge-std
     forge build
     ```
